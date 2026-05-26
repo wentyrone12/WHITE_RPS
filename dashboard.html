@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WHITE_RPS</title>
+    <link rel="icon" href="white.png">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- MENU BUTTON -->
+    <button class="menu-btn" id="menuBtn">
+        ☰
+    </button>
+
+    <!-- OVERLAY -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+
+        <div class="sidebar-top">
+
+            <h2 style="color: yellow; align-items: center; justify-self: center;">WHITE_RPS</h2>
+
+            <button class="nav-btn" id="profileBtn">
+                👤 Profile
+            </button>
+
+            <button class="nav-btn" id="searchBtn">
+                🔍 Search
+            </button>
+
+            <button class="nav-btn" id="leaderboardBtn">
+                🏆 Leaderboards
+            </button>
+
+            <button class="nav-btn" id="chatBtn">
+                💬 Chat
+            </button>
+
+            <button class="nav-btn" id="settingsBtn">
+                ⚙️ Settings
+            </button>
+
+
+
+        </div>
+
+        <!-- LOGOUT -->
+        <div class="sidebar-bottom">
+
+            <button id="logoutBtn" class="logout-side">
+                🚪 Logout
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- GAME -->
+    <div class="game-container">
+
+        <!-- RESULT CARD -->
+        <div class="result-card">
+
+            <h1 id="result">
+                Choose Your Move
+            </h1>
+
+            <p id="moves">
+                You: - | Opponent: -
+            </p>
+
+        </div>
+
+        <!-- FLOATING GAME RESULT -->
+        <div class="game-popup" id="gamePopup">
+
+            <div class="popup-card">
+
+                <div id="popupContent"></div>
+
+            </div>
+
+        </div>
+
+        <!-- BATTLE -->
+        <div class="battle-area">
+
+            <!-- PLAYER -->
+            <div class="player-side">
+
+                <div class="player-header">
+                    <h2>YOU</h2>
+                    <div class="score" id="userScore">0</div>
+                </div>
+
+                <div class="battle-hand" id="playerHand">
+                    ✊
+                </div>
+
+            </div>
+
+            <!-- CENTER -->
+            <div class="middle-section">
+
+                <div class="countdown" id="countdown"></div>
+
+            </div>
+
+            <!-- OPPONENT -->
+            <div class="player-side">
+
+                <div class="player-header">
+                    <h2 class="opponent">BOT</h2>
+                    <div class="score" id="computerScore">0</div>
+                </div>
+
+                <div class="battle-hand enemy" id="computerHand">
+                    ✊
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CHOICES -->
+        <div class="choices">
+
+            <button class="choice" onclick="playGame('rock')">
+                <div class="emoji">✊</div>
+            </button>
+
+            <button class="choice" onclick="playGame('paper')">
+                <div class="emoji">✋</div>
+            </button>
+
+            <button class="choice" onclick="playGame('scissors')">
+                <div class="emoji">✌️</div>
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- PROFILE MODAL -->
+    <div class="profile-modal" id="profileModal">
+
+        <div class="profile-card">
+
+            <button class="close-profile" id="closeProfile">
+                ✖
+            </button>
+
+            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="profileImage" class="profile-image">
+
+            <h2 id="profileUsername">
+                Username
+            </h2>
+
+            <p id="profileBio" style="color: yellow;">
+                No bio yet.
+            </p>
+
+            <p id="profileAge">
+                Age: N/A
+            </p>
+
+            <p id="profileGender">
+                Gender: N/A
+            </p>
+
+            <button id="editProfileBtn" class="edit-profile-btn">
+                Edit Profile
+            </button>
+
+            <div class="edit-section" id="editSection">
+
+                <input type="file" id="profileUpload">
+
+                <input type="text" id="editBio" placeholder="Enter Bio">
+
+                <input type="number" id="editAge" placeholder="Enter Age">
+
+                <select id="editGender">
+
+                    <option value="">
+                        Select Gender
+                    </option>
+
+                    <option value="Male">
+                        Male
+                    </option>
+
+                    <option value="Female">
+                        Female
+                    </option>
+
+                </select>
+
+                <button id="saveProfileBtn">
+                    Save Profile
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- SEARCH MODAL -->
+    <div class="profile-modal" id="searchModal">
+
+        <div class="profile-card">
+
+            <button class="close-profilesearch" id="closeSearch">
+                ✖
+            </button>
+
+            <h2 class="usersearch">User Search</h2>
+
+            <div class="search-box">
+
+                <input type="text" id="searchInput" placeholder="Search username"
+                    style="height: 30px; border-radius: 5px; padding: 10px; position: relative; top: -30px; color: yellow; background-color: black; border: 2px solid green; ">
+
+                <button id="searchUserBtn"
+                    style="background-color: rgb(79, 255, 79); color: black; border-radius: 10px; font-size: 12px; position: relative; top: -30px; width: 60px;">
+                    Search
+                </button>
+
+            </div>
+
+            <div id="searchResult"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- VIEW USER PROFILE -->
+    <div class="profile-modal" id="viewUserModal">
+
+        <div class="profile-card">
+
+            <button class="close-profile" id="closeViewUser">
+                ✖
+            </button>
+
+            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-image" id="viewUserImage">
+
+            <h2 id="viewUserName">
+                Username
+            </h2>
+
+            <p id="viewUserStatus">
+                Offline
+            </p>
+
+            <p id="viewUserBio" style="color: yellow;">
+                No bio
+            </p>
+
+            <p id="viewUserAge">
+                Age: N/A
+            </p>
+
+            <p id="viewUserGender">
+                Gender: N/A
+            </p>
+
+            <div class="profile-action-buttons">
+
+                <button id="startChatBtn" class="edit-profile-btn">
+                    💬 Chat
+                </button>
+
+                <button id="challengeBtn" class="edit-profile-btn">
+                    🎮 Play
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHAT LIST MODAL -->
+    <div class="profile-modal" id="chatListModal">
+
+        <div class="profile-card">
+
+            <button class="close-profile" id="closeChatList">
+                ✖
+            </button>
+
+            <h2 style="font-size: 30px; position: relative; top: -80px; left: 5px;">Chats</h2>
+
+            <div id="chatList"></div>
+
+        </div>
+
+    </div>
+
+    <!-- CHAT MODAL -->
+    <div class="profile-modal" id="chatModal">
+
+        <div class="profile-card">
+
+            <button class="close-profile" id="closeChat" style="position: relative; top: 30px; left: 140px;">
+                ✖
+            </button>
+
+            <img id="chatUserImage" class="profile-image" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+
+            <h2 id="chatUserName">
+                Username
+            </h2>
+
+            <div id="chatMessages" class="chat-messages"></div>
+
+            <div class="chat-input-box">
+
+                <input type="text" id="chatInput" placeholder="Type message..."
+                    style="position: relative; top: -30px; border: 1px solid yellowgreen;">
+
+                <button id="sendMessageBtn" style="position: relative; top: -30px;">
+                    Send
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    </div>
+
+    <!-- NOTIFICATION BUTTON -->
+    <button id="notifBtn" class="notif-btn">
+        🔔
+        <span id="notifCount">0</span>
+    </button>
+
+    <!-- NOTIFICATION MODAL -->
+    <div class="profile-modal" id="notifModal">
+
+        <div class="profile-card">
+
+            <button class="close-profile" id="closeNotif">
+                ✖
+            </button>
+
+            <h2 style="font-size: 30px; position: relative; top: -80px; left: 5px;">Game Requests</h2>
+
+            <div id="notifList">No request</div>
+
+        </div>
+
+        <!-- GAME POPUP -->
+        <div class="game-popup" id="gamePopup">
+
+            <div class="popup-card" id="popupContent">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SETTINGS MODAL -->
+    <!-- SETTINGS MODAL (FACEBOOK STYLE) -->
+    <div class="profile-modal" id="settingsModal">
+
+        <div class="settings-container">
+
+            <!-- LEFT MENU -->
+            <div class="settings-sidebar">
+
+                <h2>⚙️ Settings</h2>
+
+            </div>
+
+            <!-- RIGHT CONTENT -->
+            <div class="settings-content">
+
+                <button class="close-profile" id="closeSettings">✖</button>
+
+                <!-- PERSONAL -->
+                <div class="tab-content active" id="personal">
+
+                    <h3>👤 Personal Info</h3>
+
+                    <p id="settingsEmail">Email: -</p>
+                    <p id="settingsUID">User ID: -</p>
+
+                    <input type="text" id="newUsername" placeholder="New Username">
+                    <button id="changeUsernameBtn">Save Username</button>
+
+                </div>
+
+                <!-- ACCOUNT -->
+                <div class="tab-content" id="account">
+
+                    <h3>🔒 Account Settings</h3>
+
+                    <input type="password" id="newPassword" placeholder="New Password">
+                    <button id="changePasswordBtn">Update Password</button>
+
+                </div>
+
+                <!-- DANGER -->
+                <div class="tab-content" id="danger">
+
+                    <h3 style="color:red;">⚠️ Danger Zone</h3>
+
+                    <button id="deleteAccountBtn" style="background:red;">
+                        Delete Account
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LEADERBOARD MODAL -->
+    <div class="profile-modal" id="leaderboardModal">
+
+        <div class="profile-card">
+
+            <button class="close-profile" id="closeLeaderboard">✖</button>
+
+            <h2 style="font-size: 28px; margin-bottom: 10px; position: absolute;
+            right: 30px;">🏆 Leaderboards</h2>
+
+            <div id="leaderboardList" class="leaderboard-list">
+                Loading...
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="main.js"></script>
+
+</body>
+
+</html>

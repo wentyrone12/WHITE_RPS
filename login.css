@@ -1,0 +1,157 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    font-family: Arial;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #00ff88;
+}
+
+.login-container {
+    position: absolute;
+    justify-self: center;
+    width: 250px;
+    background: #111;
+    padding: 40px;
+    border-radius: 20px;
+    border: 2px solid #00ff88;
+    box-shadow: 0 0 20px #00ff88;
+    text-align: center;
+}
+
+.login-container h1 {
+    margin-bottom: 30px;
+}
+
+input {
+    width: 90%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    background: #222;
+    color: white;
+    font-size: 15px;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #00ff88;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.login {
+    width: 40%;
+}
+
+.links {
+    margin-top: 15px;
+}
+
+.links button {
+    background: #222;
+    color: #00ff88;
+}
+
+#loginBtn{
+    background: linear-gradient(200deg, cyan, lightgreen, gold, cyan);
+    background-size: 600% 600%;
+    animation: bgMove 8s ease infinite;
+    transition: 0.4s ease;
+    text-align: center;
+}
+@keyframes bgMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    width: 350px;
+    background: #111;
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid #00ff88;
+    box-shadow: 0 0 20px #00ff88;
+    text-align: center;
+}
+
+.modal-content input {
+    width: 80%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    background: #222;
+    color: white;
+}
+
+.closeBtn {
+    background: red !important;
+    color: white !important;
+}
+
+.tagname {
+    position: absolute;
+    bottom: 30px;
+    font-size: 12px;
+    color: gray;
+    margin-bottom: 20px;
+}
+
+@media(max-width:680px) {
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: rgb(0, 2, 0);
+        font-family: Arial;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        color: #00ff88;
+    }
+
+    .login-container {
+        position: absolute;
+        width: 250px;
+        background: #000000;
+        padding: 40px;
+        border-radius: 20px;
+        border: 2px solid #00ff88;
+        box-shadow: 0 0 20px #00ff88;
+        text-align: center;
+    }
+}

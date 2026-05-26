@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>WHITE_RPS</title>
+
+<link rel="icon" href="white.png">
+
+<link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+<div class="login-container">
+
+    <h1>WHITE_RPS</h1>
+
+    <!-- LOGIN -->
+    <input type="email" id="email" placeholder="Enter Email">
+
+    <input type="password" id="password" placeholder="Enter Password">
+
+    <button id="loginBtn">
+        LOGIN
+    </button>
+
+    <div class="links">
+
+        <button class="login" id="openSignup">
+            CREATE ACCOUNT
+        </button>
+
+        <button class="login" id="openForgot">
+            FORGOT PASSWORD
+        </button>
+
+    </div>
+
+</div>
+
+<!-- SIGNUP MODAL -->
+<div class="modal" id="signupModal">
+
+    <div class="modal-content">
+
+        <h2>Create Account</h2>
+
+        <input type="text" id="signupUsername" placeholder="Enter Username">
+
+        <input type="email" id="signupEmail" placeholder="Enter Email">
+
+        <input type="password" id="signupPassword" placeholder="Enter Password">
+
+        <button id="signupBtn">
+            CREATE
+        </button>
+
+        <button class="closeBtn" id="closeSignup">
+            CLOSE
+        </button>
+
+    </div>
+
+</div>
+
+<!-- FORGOT PASSWORD -->
+<div class="modal" id="forgotModal">
+
+    <div class="modal-content">
+
+        <h2>Forgot Password</h2>
+
+        <input type="email" id="forgotEmail" placeholder="Enter Email">
+
+        <button id="forgotBtn">
+            VERIFY EMAIL
+        </button>
+
+        <button class="closeBtn" id="closeForgot">
+            CLOSE
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="tagname">Made by Wenxyz</div>
+
+<script type="module" src="login.js"></script>
+
+</body>
+</html>
