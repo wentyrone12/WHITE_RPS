@@ -1738,8 +1738,6 @@ function loadLeaderboard() {
         });
 
 }
-
-
 // SETTINGS TAB SWITCH
 const tabs = document.querySelectorAll(".settings-tab");
 const contents = document.querySelectorAll(".tab-content");
