@@ -120,15 +120,6 @@ body {
     cursor: pointer;
 }
 
-/* MOBILE */
-@media(max-width:768px) {
-
-    .sidebar {
-        width: 250px;
-    }
-
-}
-
 .result-card {
     background: #101010;
     border: 2px solid #00ff88;
@@ -1376,20 +1367,112 @@ body {
     border: 1px solid #00ff88;
 }
 
-/* Mobile */
+.settings-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
-@media(max-width:768px) {
+.settings-tab {
 
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    height: 55px;
 
-    .games-grid {
-        grid-template-columns: 1fr;
-    }
+    border-radius: 15px;
 
-    .welcome-card h1 {
-        font-size: 24px;
-    }
+    font-size: 16px;
+
+    text-align: left;
+
+    padding-left: 20px;
+
+    transition: .25s;
+
+}
+
+.tab-content {
+
+    display: none;
+
+    animation: fade .25s;
+
+}
+
+.tab-content.active {
+
+    display: block;
+
+}
+
+.settings-card {
+
+    background: #111;
+
+    border: 1px solid rgba(0, 255, 136, .25);
+
+    border-radius: 18px;
+
+    padding: 20px;
+
+    margin-bottom: 18px;
+
+}
+
+.settings-card {
+
+    background: #111;
+
+    border: 1px solid rgba(0, 255, 136, .3);
+
+    border-radius: 18px;
+
+    padding: 20px;
+
+    margin-bottom: 20px;
+
+    box-shadow: 0 0 15px rgba(0, 255, 136, .1);
+
+}
+
+
+.settings-tab {
+
+    padding: 14px;
+
+    border: none;
+
+    background: #111;
+
+    color: white;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    text-align: left;
+
+}
+
+
+.settings-tab.active {
+
+    background: #00ff88;
+
+    color: black;
+
+    font-weight: bold;
+
+}
+
+
+.tab-content {
+
+    display: none;
+
+}
+
+
+.tab-content.active {
+
+    display: block;
 
 }
