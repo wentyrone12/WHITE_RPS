@@ -1020,6 +1020,22 @@ function startBattleAnimation(myMove, enemyMove, callback) {
     }, 3000);
 }
 
+function resetScores() {
+
+    userScore = 0;
+    opponentScore = 0;
+
+    userScoreText.innerText = "0";
+    computerScoreText.innerText = "0";
+
+    resultText.innerText = "Choose Your Move";
+    movesText.innerText = "You: - | Opponent: -";
+
+    playerHand.innerText = "✊";
+    computerHand.innerText = "✊";
+
+}
+
 
 // LOAD NOTIFICATIONS
 function loadNotifications(user) {
@@ -1086,9 +1102,9 @@ function loadNotifications(user) {
 
                         .addEventListener("click", () => {
 
-                            currentGameRoom =
-                                notif.roomID;
+                            resetScores();
 
+                            currentGameRoom = notif.roomID;
                             gameStarted = true;
 
                             opponentName.innerText =
@@ -1525,6 +1541,8 @@ function listenGame() {
         }
     );
 
+    resetScores();
+
 }
 
 function showPlayNotif(data) {
@@ -1655,9 +1673,16 @@ setTimeout(() => {
 }, 3000);
 
 function resetToAI() {
+
+    resetScores();
+
     gameStarted = false;
     currentGameRoom = "";
-    opponentName.innerText = "OPPONENT";
+    prepStarted = false;
+    canPick = false;
+
+    opponentName.innerText = "BOT";
+
 }
 
 const leaderboardBtn = document.getElementById("leaderboardBtn");
