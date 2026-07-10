@@ -8,8 +8,11 @@ import {
 
 import {
     updatePassword,
-    deleteUser
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    deleteUser,
+    EmailAuthProvider,
+    reauthenticateWithCredential
+}
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
     auth,
@@ -69,29 +72,92 @@ document.getElementById("changePasswordBtn")
     .addEventListener("click", async () => {
 
         const user = auth.currentUser;
-        const newPass = document.getElementById("newPassword").value;
 
-        if (!newPass || newPass.length < 6) {
-            return alert("Password must be at least 6 characters");
+        if (!user) {
+            return alert("User not logged in.");
+        }
+
+        const currentPass =
+            document.getElementById("currentPassword").value.trim();
+
+        const newPass =
+            document.getElementById("newPassword").value.trim();
+
+        const confirmPass =
+            document.getElementById("confirmPassword").value.trim();
+
+        if (
+            currentPass === "" ||
+            newPass === "" ||
+            confirmPass === ""
+        ) {
+            return alert("Please fill in all fields.");
+        }
+
+        if (newPass.length < 6) {
+            return alert("New password must be at least 6 characters.");
+        }
+
+        if (newPass !== confirmPass) {
+            return alert("New password and Confirm password do not match.");
+        }
+
+        if (currentPass === newPass) {
+            return alert("New password must be different from current password.");
         }
 
         try {
 
+            const credential =
+                EmailAuthProvider.credential(
+                    user.email,
+                    currentPass
+                );
+
+            await reauthenticateWithCredential(
+                user,
+                credential
+            );
+
             await updatePassword(user, newPass);
-            alert("✅ Password updated!");
 
-        } catch (err) {
+            alert("✅ Password changed successfully!");
 
-            if (err.code === "auth/requires-recent-login") {
-                alert("⚠️ Please logout and login again before changing password.");
-            } else {
+            document.getElementById("currentPassword").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("confirmPassword").value = "";
+
+        }
+
+        catch (err) {
+
+            if (err.code === "auth/invalid-credential") {
+
+                alert("❌ Current password is incorrect.");
+
+            }
+
+            else if (err.code === "auth/wrong-password") {
+
+                alert("❌ Current password is incorrect.");
+
+            }
+
+            else if (err.code === "auth/requires-recent-login") {
+
+                alert("⚠ Please logout then login again before changing your password.");
+
+            }
+
+            else {
+
                 alert(err.message);
+
             }
 
         }
 
     });
-
 
 document.getElementById("deleteAccountBtn")
     .addEventListener("click", () => {
@@ -215,6 +281,8 @@ closeProfile.addEventListener("click", () => {
 
     profileModal.style.display = "none";
 
+    profileActionButtons.style.display = "flex";
+
 });
 // LOAD USER DATA
 auth.onAuthStateChanged((user) => {
@@ -294,8 +362,6 @@ saveProfileBtn.addEventListener("click", () => {
     const file =
         document.getElementById("profileUpload")
             .files[0];
-
-
 
     function saveData(imageURL = "") {
 
@@ -402,6 +468,9 @@ const startChatBtn =
 const challengeBtn =
     document.getElementById("challengeBtn");
 
+const profileActionButtons =
+    document.querySelector(".profile-action-buttons");
+
 const notifBtn =
     document.getElementById("notifBtn");
 
@@ -434,14 +503,11 @@ closeSearch.addEventListener("click", () => {
     searchModal.style.display = "none";
 
 });
-
 // CLOSE VIEW USER
 closeViewUser.addEventListener("click", () => {
-
     viewUserModal.style.display = "none";
-
+    profileActionButtons.style.display = "flex";
 });
-
 // SEARCH USER
 searchUserBtn.addEventListener("click", () => {
 
@@ -1727,9 +1793,14 @@ function loadLeaderboard() {
                 const user = userSnap.val();
 
                 players.push({
+                    uid: userSnap.key,
                     username: user.username || "Unknown",
                     image: user.image || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-                    wins: user.wins || 0
+                    wins: user.wins || 0,
+                    bio: user.bio || "No bio",
+                    age: user.age || "N/A",
+                    gender: user.gender || "N/A",
+                    status: user.status || "offline"
                 });
 
             });
@@ -1737,28 +1808,117 @@ function loadLeaderboard() {
             // 🔥 SORT BY WINS (HIGH → LOW)
             players.sort((a, b) => b.wins - a.wins);
 
+            const myUID = auth.currentUser.uid;
+            let myRank = 0;
+
             players.forEach((player, index) => {
+
+                if (player.uid === myUID) {
+                    myRank = index + 1;
+                }
 
                 const card = document.createElement("div");
 
                 card.classList.add("user-result");
 
+                // SPECIAL TOP CARDS
+                if (index === 0) {
+                    card.classList.add("top1");
+                }
+                else if (index === 1) {
+                    card.classList.add("top2");
+                }
+                else if (index === 2) {
+                    card.classList.add("top3");
+                }
+
+                card.style.cursor = "pointer";
+
+                const medals = ["👑", "🥈", "🥉"];
+
                 card.innerHTML = `
-                    <span style="font-size:18px; font-weight:bold; width:30px;">
-                        #${index + 1}
-                    </span>
+<div class="leader-rank">
 
-                    <img src="${player.image}">
+    ${index < 3 ? medals[index] : "#" + (index + 1)}
 
-                    <div>
-                        <h3>${player.username}</h3>
-                        <p style="color: gold; text-align: start;">🏆 Wins: ${player.wins}</p>
-                    </div>
-                `;
+</div>
+
+<img src="${player.image}">
+
+<div style="flex:1;">
+
+    <h3>${player.username}</h3>
+
+    <p class="leader-wins">
+        🏆 ${player.wins} Wins
+    </p>
+
+</div>
+`;
+                // CLICKABLE
+                card.onclick = () => {
+
+                    leaderboardModal.style.display = "none";
+
+                    // ===== KUNG SARILI ANG PININDOT =====
+                    if (player.uid === auth.currentUser.uid) {
+
+                        profileModal.style.display = "flex";
+
+                        profileActionButtons.style.display = "none";
+
+                        editProfileBtn.style.display = "block";
+
+                        return;
+                    }
+
+                    // ===== KUNG IBANG PLAYER =====
+                    profileActionButtons.style.display = "flex";
+
+                    viewUserModal.style.display = "flex";
+
+                    viewUserImage.src = player.image;
+                    viewUserName.innerText = player.username;
+                    viewUserStatus.innerText = player.status;
+                    viewUserBio.innerText = player.bio;
+                    viewUserAge.innerText = "Age: " + player.age;
+                    viewUserGender.innerText = "Gender: " + player.gender;
+
+                    startChatBtn.dataset.uid = player.uid;
+                    startChatBtn.dataset.username = player.username;
+                    startChatBtn.dataset.image = player.image;
+
+                };
 
                 leaderboardList.appendChild(card);
 
             });
+
+            const me = document.createElement("div");
+
+            me.style.marginTop = "5px";
+            me.style.borderTop = "2px solid gold";
+            me.style.paddingTop = "15px";
+
+            me.innerHTML = `
+<div style="
+background:#111;
+border:2px solid gold;
+border-radius:12px;
+padding:7px;
+position:fixed;
+top: 40px;
+left:30px;
+text-align:center;">
+
+<h1 style="color:white;">
+#${myRank}
+</h1>
+
+</div>
+`;
+
+            leaderboardList.appendChild(me);
 
         });
 
