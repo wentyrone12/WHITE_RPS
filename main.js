@@ -513,7 +513,29 @@ searchUserBtn.addEventListener("click", () => {
 
     const username =
         document.getElementById("searchInput")
-            .value.toLowerCase();
+            .value
+            .trim()
+            .toLowerCase();
+
+    searchResult.innerHTML = "";
+
+    // ✅ walang input = walang lalabas
+    if (username === "") {
+        return;
+    }
+
+    if (username === "") {
+
+        searchResult.innerHTML = `
+    <div class="user-result">
+        <div style="width:100%;text-align:center;color:#999;">
+            🔍 Please enter a username.
+        </div>
+    </div>
+    `;
+
+        return;
+    }
 
     const dbRef = ref(database);
 
@@ -565,42 +587,63 @@ searchUserBtn.addEventListener("click", () => {
                         // CLICK USER PROFILE
                         userCard.addEventListener("click", () => {
 
+                            // ✅ alisin agad ang search results
+                            searchResult.innerHTML = "";
+                            document.getElementById("searchInput").value = "";
+
+                            // ✅ kung sarili ang pinindot
+                            if (userSnap.key === auth.currentUser.uid) {
+
+                                profileModal.style.display = "flex";
+                                viewUserModal.style.display = "none";
+
+                                profileActionButtons.style.display = "none";
+                                editProfileBtn.style.display = "block";
+
+                                return;
+                            }
+
+                            // ✅ ibang user
+                            profileActionButtons.style.display = "flex";
+                            editProfileBtn.style.display = "none";
+
+                            // Itago muna ang ibang cards
+                            searchModal.style.display = "none";
+                            chatModal.style.display = "none";
+                            chatListModal.style.display = "none";
+                            leaderboardModal.style.display = "none";
+                            notifModal.style.display = "none";
+                            profileModal.style.display = "none";
+
+                            // Ipakita lang ang profile
                             viewUserModal.style.display = "flex";
 
                             viewUserImage.src =
                                 user.image ||
-                                'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                                "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-                            viewUserName.innerText =
-                                user.username;
+                            viewUserName.innerText = user.username;
+                            viewUserStatus.innerText = user.status;
+                            viewUserBio.innerText = user.bio;
+                            viewUserAge.innerText = "Age: " + user.age;
+                            viewUserGender.innerText = "Gender: " + user.gender;
 
-                            viewUserStatus.innerText =
-                                user.status;
-
-                            viewUserBio.innerText =
-                                user.bio;
-
-                            viewUserAge.innerText =
-                                "Age: " + user.age;
-
-                            viewUserGender.innerText =
-                                "Gender: " + user.gender;
-
-
-                            // SAVE CHAT USER INFO
-                            startChatBtn.dataset.uid =
-                                userSnap.key;
-
-                            startChatBtn.dataset.username =
-                                user.username;
-
+                            startChatBtn.dataset.uid = userSnap.key;
+                            startChatBtn.dataset.username = user.username;
                             startChatBtn.dataset.image =
                                 user.image ||
-                                'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-
+                                "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                         });
 
                         searchResult.appendChild(userCard);
+
+                        userCard.scrollIntoView({
+
+                            behavior: "smooth",
+
+                            block: "nearest"
+
+                        });
 
                     }
 
@@ -645,6 +688,9 @@ const chatUserName =
 
 const chatUserImage =
     document.getElementById("chatUserImage");
+
+const chatProfileHeader =
+    document.getElementById("chatProfileHeader");
 
 let currentChatUID = "";
 let currentChatName = "";
@@ -775,6 +821,82 @@ function openChat() {
         }
 
     );
+
+}
+
+function openUserProfileFromChat() {
+
+    get(ref(database, "users/" + currentChatUID))
+        .then((snapshot) => {
+
+            if (!snapshot.exists()) return;
+
+            const user = snapshot.val();
+
+            // sarili
+            if (currentChatUID === auth.currentUser.uid) {
+
+                chatModal.style.display = "none";
+                chatListModal.style.display = "none";
+                searchModal.style.display = "none";
+                leaderboardModal.style.display = "none";
+                notifModal.style.display = "none";
+
+                profileModal.style.display = "flex";
+                viewUserModal.style.display = "none";
+
+                profileActionButtons.style.display = "none";
+                editProfileBtn.style.display = "block";
+
+                return;
+
+            }
+
+            // ibang user
+
+            chatModal.style.display = "none";
+            chatListModal.style.display = "none";
+            searchModal.style.display = "none";
+            leaderboardModal.style.display = "none";
+            notifModal.style.display = "none";
+            profileModal.style.display = "none";
+
+            viewUserModal.style.display = "flex";
+
+            viewUserImage.src =
+                user.image ||
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+            viewUserName.innerText =
+                user.username;
+
+            viewUserStatus.innerText =
+                user.status || "offline";
+
+            viewUserBio.innerText =
+                user.bio || "No bio";
+
+            viewUserAge.innerText =
+                "Age: " + (user.age || "N/A");
+
+            viewUserGender.innerText =
+                "Gender: " + (user.gender || "N/A");
+
+            profileActionButtons.style.display = "flex";
+
+            editProfileBtn.style.display = "none";
+
+            startChatBtn.dataset.uid =
+                currentChatUID;
+
+            startChatBtn.dataset.username =
+                user.username;
+
+            startChatBtn.dataset.image =
+                user.image ||
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+        });
 
 }
 
@@ -920,6 +1042,19 @@ function loadChats() {
         }
 
     );
+
+}
+
+function hideAllCards() {
+
+    profileModal.style.display = "none";
+    searchModal.style.display = "none";
+    viewUserModal.style.display = "none";
+    chatModal.style.display = "none";
+    chatListModal.style.display = "none";
+    notifModal.style.display = "none";
+    leaderboardModal.style.display = "none";
+    settingsModal.style.display = "none";
 
 }
 
@@ -1939,6 +2074,12 @@ tabs.forEach(tab => {
         document.getElementById(target).classList.add("active");
 
     });
+});
+
+chatProfileHeader.addEventListener("click", () => {
+
+    openUserProfileFromChat();
+
 });
 
 window.playGame = playGame;
