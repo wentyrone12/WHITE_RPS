@@ -774,6 +774,14 @@ function openChat() {
 
                     const msg = msgSnap.val();
 
+                    // UPDATE CHAT ORDER KAPAG MAY BAGONG MESSAGE
+                    const now = msg.time || Date.now();
+
+                    update(ref(database, "chatList/" + auth.currentUser.uid + "/" + currentChatUID), {
+                        lastMessage: msg.text,
+                        lastTimestamp: now
+                    });
+
                     const msgDiv =
                         document.createElement("div");
 
@@ -901,72 +909,40 @@ function openUserProfileFromChat() {
 }
 
 // SEND MESSAGE
+// SEND MESSAGE
 sendMessageBtn.addEventListener("click", () => {
 
-    const text =
-        chatInput.value.trim();
-
+    const text = chatInput.value.trim();
     if (text === "") return;
 
-    const myUID =
-        auth.currentUser.uid;
+    const myUID = auth.currentUser.uid;
+    const roomID = [myUID, currentChatUID].sort().join("_");
+    const now = Date.now();
 
-    const roomID =
-        [myUID, currentChatUID]
-            .sort()
-            .join("_");
+    // SAVE MESSAGE
+    push(ref(database, "messages/" + roomID), {
+        sender: myUID,
+        text: text,
+        time: now
+    });
 
-    push(
+    // UPDATE CHAT LIST (ME)
+    update(ref(database, "chatList/" + myUID + "/" + currentChatUID), {
+        uid: currentChatUID,
+        username: currentChatName,
+        image: currentChatImage,
+        lastMessage: text,
+        lastTimestamp: now
+    });
 
-        ref(database, "messages/" + roomID),
-
-        {
-
-            sender: myUID,
-            text: text,
-            time: Date.now()
-
-        }
-
-    );
-    // SAVE CHAT LIST USER1
-    set(
-
-        ref(
-            database,
-            "chatList/" +
-            myUID + "/" +
-            currentChatUID
-        ),
-
-        {
-
-            uid: currentChatUID,
-            username: currentChatName,
-            image: currentChatImage
-
-        }
-
-    );
-    // SAVE CHAT LIST USER2
-    set(
-
-        ref(
-            database,
-            "chatList/" +
-            currentChatUID + "/" +
-            myUID
-        ),
-
-        {
-
-            uid: myUID,
-            username: profileUsername.innerText,
-            image: profileImage.src
-
-        }
-
-    );
+    // UPDATE CHAT LIST (OTHER USER)
+    update(ref(database, "chatList/" + currentChatUID + "/" + myUID), {
+        uid: myUID,
+        username: profileUsername.innerText,
+        image: profileImage.src,
+        lastMessage: text,
+        lastTimestamp: now
+    });
 
     chatInput.value = "";
 
@@ -975,73 +951,85 @@ sendMessageBtn.addEventListener("click", () => {
 // LOAD CHAT LIST
 function loadChats() {
 
-    const myUID =
-        auth.currentUser.uid;
+    const myUID = auth.currentUser.uid;
 
-    onValue(
+    onValue(ref(database, "chatList/" + myUID), (snapshot) => {
 
-        ref(database, "chatList/" + myUID),
+        chatList.innerHTML = "";
 
-        (snapshot) => {
+        if (!snapshot.exists()) {
 
-            chatList.innerHTML = "";
-
-            if (snapshot.exists()) {
-
-                snapshot.forEach((chatSnap) => {
-
-                    const chat =
-                        chatSnap.val();
-
-                    const chatCard =
-                        document.createElement("div");
-
-                    chatCard.classList.add("user-result");
-
-                    chatCard.innerHTML = `
-
-                    <img src="${chat.image ||
-                        'https://cdn-icons-png.flaticon.com/512/149/149071.png'
-                        }">
-
-                    <div>
-
-                        <h3>${chat.username}</h3>
-
-                    </div>
-
-                    `;
-
-                    chatCard.addEventListener("click", () => {
-
-                        currentChatUID =
-                            chat.uid;
-
-                        currentChatName =
-                            chat.username;
-
-                        currentChatImage =
-                            chat.image;
-
-                        openChat();
-
-                    });
-
-                    chatList.appendChild(chatCard);
-
-                });
-
-            }
-            else {
-
-                chatList.innerHTML =
-                    "<p>No chats yet.</p>";
-
-            }
+            chatList.innerHTML = "<p>No chats yet.</p>";
+            return;
 
         }
 
-    );
+        let chats = [];
+
+        snapshot.forEach(chatSnap => {
+
+            chats.push(chatSnap.val());
+
+        });
+
+        // SORT LATEST FIRST
+        chats.sort((a, b) => b.lastTimestamp - a.lastTimestamp);
+
+        chats.forEach(chat => {
+
+            const date = new Date(chat.lastTimestamp);
+
+            let timeText = date.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+
+            let chatCard = document.createElement("div");
+
+            chatCard.className = "user-result";
+
+            chatCard.innerHTML = `
+
+<img src="${chat.image || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
+
+<div style="flex:1">
+
+<h3>${chat.username}</h3>
+
+<p style="font-size:13px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+${chat.lastMessage}
+</p>
+
+</div>
+
+<div style="
+font-size:11px;
+color:#999;
+margin-left:10px;
+white-space:nowrap;
+">
+
+${timeText}
+
+</div>
+
+`;
+
+            chatCard.onclick = () => {
+
+                currentChatUID = chat.uid;
+                currentChatName = chat.username;
+                currentChatImage = chat.image;
+
+                openChat();
+
+            };
+
+            chatList.appendChild(chatCard);
+
+        });
+
+    });
 
 }
 
