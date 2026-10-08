@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0f14">
+    <meta name="description" content="WHITE_RPS — competitive Rock Paper Scissors social game">
+    <title>WHITE_RPS • Arena</title>
+    <link rel="icon" href="white.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-bg" aria-hidden="true">
+        <span class="orb orb-a"></span>
+        <span class="orb orb-b"></span>
+        <span class="orb orb-c"></span>
+    </div>
+
+    <button class="menu-btn" id="menuBtn" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <div class="overlay" id="overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div>
+            <div class="brand-lockup">
+                <div class="brand-mark">W</div>
+                <div>
+                    <div class="brand-name">WHITE_RPS</div>
+                    <div class="brand-sub">ARENA • ONLINE</div>
+                </div>
+            </div>
+
+            <div class="mini-profile" id="miniProfile">
+                <img id="miniProfileImage" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                <div class="mini-profile-copy">
+                    <strong id="miniProfileName">Player</strong>
+                    <span id="miniProfileStatus" class="status-pill"><i></i> Online</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" aria-label="Primary navigation">
+                <button class="nav-btn active-nav" id="profileBtn"><span></span><span>Profile</span></button>
+                <button class="nav-btn" id="searchBtn"><span></span><span>Find Players</span></button>
+                <button class="nav-btn" id="leaderboardBtn"><span></span><span>Leaderboards</span></button>
+                <button class="nav-btn" id="chatBtn"><span></span><span>Messages</span><span class="nav-badge hidden" id="chatBadge">0</span></button>
+                <button class="nav-btn" id="settingsBtn"><span></span><span>Settings</span></button>
+            </nav>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="connection-card">
+                <span class="connection-dot"></span>
+                <div>
+                    <strong>Secure session</strong>
+                    <small>Firebase realtime sync</small>
+                </div>
+            </div>
+            <button id="logoutBtn" class="logout-side"><span>↪</span> Logout</button>
+        </div>
+    </aside>
+
+    <main class="main-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">RPS ARENA</p>
+                <h1>Ready for your next round?</h1>
+            </div>
+            <div class="topbar-actions">
+                <button class="icon-btn notif-trigger" id="notifBtn" aria-label="Notifications">
+                    🔔 <span id="notifCount" class="counter-badge">0</span>
+                </button>
+                <button class="user-chip" id="topProfileBtn" aria-label="Open profile">
+                    <img id="topProfileImage" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                    <span id="topProfileName">Player</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="game-container">
+            <div class="hero-strip">
+                <div>
+                    <span class="live-dot"></span>
+                    <span>LIVE ARENA</span>
+                </div>
+                <div class="hero-meta">
+                    <span id="roundStatus">SOLO • BOT MATCH</span>
+                    <span class="hero-divider"></span>
+                    <span id="heroRecord">0W • 0L • 0D</span>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-glow"></div>
+                <span class="result-kicker">ROUND STATUS</span>
+                <h2 id="result">Choose Your Move</h2>
+                <p id="moves">You: — <span>•</span> Opponent: —</p>
+            </div>
+
+            <div class="battle-area">
+                <section class="player-side player-card-3d">
+                    <div class="player-header">
+                        <div class="player-identity">
+                            <img id="battlePlayerAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                            <div>
+                                <span class="player-label">PLAYER</span>
+                                <h2>YOU</h2>
+                            </div>
+                        </div>
+                        <div class="score-wrap">
+                            <span class="score-label">SCORE</span>
+                            <div class="score" id="userScore">0</div>
+                        </div>
+                    </div>
+                    <div class="battle-stage player-stage">
+                        <div class="stage-ring"></div>
+                        <div class="battle-hand team" id="playerHand">✊</div>
+                    </div>
+                </section>
+
+                <div class="middle-section">
+                    <div class="vs-orb">
+                        <span id="countdown">VS</span>
+                    </div>
+                    <div class="arena-line"></div>
+                </div>
+
+                <section class="player-side player-card-3d">
+                    <div class="player-header">
+                        <div class="player-identity">
+                            <div>
+                                <span class="player-label">OPPONENT</span>
+                                <h2 class="opponent">BOT</h2>
+                            </div>
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                        </div>
+                        <div class="score-wrap">
+                            <span class="score-label">SCORE</span>
+                            <div class="score" id="computerScore">0</div>
+                        </div>
+                    </div>
+                    <div class="battle-stage enemy-stage">
+                        <div class="stage-ring"></div>
+                        <div class="battle-hand enemy" id="computerHand">✊</div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="choices-head">
+                <div>
+                    <span class="result-kicker">MAKE YOUR MOVE</span>
+                    <h3>Choose your weapon</h3>
+                </div>
+                <span class="choice-hint">Tap / click to play</span>
+            </div>
+
+            <button class="mobile-weapon-trigger" id="mobileChooseWeaponBtn">🎮 Choose Weapon</button>
+
+            <div class="choices">
+                <button class="choice" data-choice="rock" onclick="playGame('rock')">
+                    <span class="choice-key">1</span>
+                    <div class="emoji">✊</div>
+                    <strong>Rock</strong>
+                    <small>Crushes scissors</small>
+                </button>
+                <button class="choice" data-choice="paper" onclick="playGame('paper')">
+                    <span class="choice-key">2</span>
+                    <div class="emoji">✋</div>
+                    <strong>Paper</strong>
+                    <small>Covers rock</small>
+                </button>
+                <button class="choice" data-choice="scissors" onclick="playGame('scissors')">
+                    <span class="choice-key">3</span>
+                    <div class="emoji">✌️</div>
+                    <strong>Scissors</strong>
+                    <small>Cuts paper</small>
+                </button>
+            </div>
+
+            <section class="quick-grid">
+                <article class="info-card">
+                    <span class="info-icon">⚡</span>
+                    <div>
+                        <span class="info-label">Your record</span>
+                        <strong id="quickRecord">0 Wins</strong>
+                    </div>
+                </article>
+                <article class="info-card">
+                    <span class="info-icon">🎯</span>
+                    <div>
+                        <span class="info-label">Win rate</span>
+                        <strong id="quickWinRate">0%</strong>
+                    </div>
+                </article>
+                <article class="info-card">
+                    <span class="info-icon">🏅</span>
+                    <div>
+                        <span class="info-label">Leaderboard</span>
+                        <strong id="quickRank">#—</strong>
+                    </div>
+                </article>
+                <button class="info-card info-card-button" id="quickLeaderboardBtn">
+                    <span class="info-icon">📈</span>
+                    <div>
+                        <span class="info-label">Explore</span>
+                        <strong>Player rankings →</strong>
+                    </div>
+                </button>
+            </section>
+        </section>
+    </main>
+
+    <!-- GAME RESULT -->
+    <div class="game-popup" id="gamePopup" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="popup-card">
+            <button class="modal-x" id="closeGamePopup" aria-label="Close result">×</button>
+            <div id="popupContent"></div>
+        </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="profile-modal" id="profileModal" role="dialog" aria-modal="true">
+        <div class="profile-card profile-card-wide">
+            <button class="modal-x" id="closeProfile" aria-label="Close profile">×</button>
+            <div class="profile-cover"></div>
+            <div class="profile-main">
+                <div class="profile-avatar-wrap">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="profileImage" class="profile-image" alt="Profile picture">
+                    <span class="presence-ring" id="profilePresence"></span>
+                </div>
+                <div class="profile-heading">
+                    <span class="section-kicker">PLAYER PROFILE</span>
+                    <h2 id="profileUsername">Username</h2>
+                    <p id="profileBio">No bio yet.</p>
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <div><strong id="profileWins">0</strong><span>Wins</span></div>
+                <div><strong id="profileGames">0</strong><span>Games</span></div>
+                <div><strong id="profileWinRate">0%</strong><span>Win rate</span></div>
+                <div><strong id="profileRank">#—</strong><span>Rank</span></div>
+            </div>
+
+            <div class="profile-details">
+                <div><span>Age</span><strong id="profileAge">N/A</strong></div>
+                <div><span>Gender</span><strong id="profileGender">N/A</strong></div>
+                <div><span>Status</span><strong id="profileStatusText">Online</strong></div>
+            </div>
+
+            <button id="editProfileBtn" class="primary-btn">Edit Profile</button>
+
+            <div class="edit-section" id="editSection">
+                <div class="form-grid">
+                    <label>Profile picture<input type="file" id="profileUpload" accept="image/*"></label>
+                    <label>Bio<input type="text" id="editBio" placeholder="Tell players about you" maxlength="120"></label>
+                    <label>Age<input type="number" id="editAge" placeholder="Optional" min="1" max="120"></label>
+                    <label>Gender<select id="editGender"><option value="">Prefer not to say</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></label>
+                </div>
+                <div class="edit-actions">
+                    <button id="cancelEditProfileBtn" class="secondary-btn">Cancel</button>
+                    <button id="saveProfileBtn" class="primary-btn">Save Profile</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="profile-modal" id="searchModal" role="dialog" aria-modal="true">
+        <div class="profile-card modal-panel">
+            <button class="modal-x" id="closeSearch" aria-label="Close player search">×</button>
+            <div class="modal-heading">
+                <span class="section-kicker">SOCIAL</span>
+                <h2>Find Players</h2>
+                <p>Search usernames and start a chat or challenge.</p>
+            </div>
+            <div class="search-box">
+                <span>⌕</span>
+                <input type="text" id="searchInput" placeholder="Search username…" autocomplete="off">
+                <button id="clearSearchBtn" class="ghost-icon" aria-label="Clear search">×</button>
+                <button id="searchUserBtn" class="primary-btn search-submit">Search</button>
+            </div>
+            <div id="searchResult" class="search-results"></div>
+        </div>
+    </div>
+
+    <!-- VIEW USER -->
+    <div class="profile-modal" id="viewUserModal" role="dialog" aria-modal="true">
+        <div class="profile-card profile-card-compact">
+            <button class="modal-x" id="closeViewUser" aria-label="Close player profile">×</button>
+            <div class="view-user-hero">
+                <div class="profile-avatar-wrap">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-image" id="viewUserImage" alt="">
+                    <span class="presence-ring" id="viewUserPresence"></span>
+                </div>
+                <span class="section-kicker">PLAYER CARD</span>
+                <h2 id="viewUserName">Username</h2>
+                <p id="viewUserStatus">Offline</p>
+            </div>
+            <div class="view-user-copy">
+                <p id="viewUserBio">No bio</p>
+                <div class="profile-details">
+                    <div><span>Age</span><strong id="viewUserAge">N/A</strong></div>
+                    <div><span>Gender</span><strong id="viewUserGender">N/A</strong></div>
+                </div>
+            </div>
+            <div class="profile-action-buttons">
+                <button id="startChatBtn" class="primary-btn">💬 Chat</button>
+                <button id="challengeBtn" class="secondary-btn">⚔ Challenge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAT LIST -->
+    <div class="profile-modal" id="chatListModal" role="dialog" aria-modal="true">
+        <div class="profile-card modal-panel chat-list-panel">
+            <button class="modal-x" id="closeChatList" aria-label="Close messages">×</button>
+            <div class="modal-heading row-heading">
+                <div>
+                    <span class="section-kicker">SOCIAL</span>
+                    <h2>Messages</h2>
+                </div>
+                <button class="small-action" id="newChatBtn">New Chat</button>
+            </div>
+            <div class="chat-search">
+                <span>⌕</span>
+                <input id="chatListSearch" type="text" placeholder="Search conversations…" autocomplete="off">
+            </div>
+            <div id="chatList" class="chat-list"></div>
+        </div>
+    </div>
+
+    <!-- CHAT CONVERSATION -->
+    <div class="profile-modal" id="chatModal" role="dialog" aria-modal="true">
+        <div class="profile-card chat-panel">
+            <div id="chatProfileHeader" class="chat-profile-header">
+                <button class="back-chat" id="closeChat" aria-label="Back to messages">←</button>
+                <img id="chatUserImage" class="chat-header-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                <div>
+                    <span class="section-kicker">CONVERSATION</span>
+                    <h2 id="chatUserName">Username</h2>
+                    <p id="chatUserStatus">Offline</p>
+                    <span id="chatTyping" class="typing-indicator"></span>
+                </div>
+            </div>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-box">
+                <textarea id="chatInput" placeholder="Write a message…" rows="1" maxlength="1000"></textarea>
+                <div id="chatEditBar" class="chat-edit-bar hidden">
+                    <span>✏️ Editing message</span>
+                    <button id="cancelEditBtn" type="button">Cancel</button>
+                </div>
+                <div class="chat-compose-footer">
+                    <small id="chatCharCount">0 / 1000</small>
+                    <div class="chat-compose-actions">
+                        <button id="clearChatInputBtn" class="ghost-icon" title="Clear">×</button>
+                        <button id="chatChallengeBtn" class="challenge-send-btn" title="Challenge this player">⚔ Challenge</button>
+                        <button id="sendMessageBtn" class="send-btn">Send ↗</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-modal weapon-picker-modal" id="weaponPickerModal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="profile-card weapon-picker-panel">
+            <button class="modal-x" id="closeWeaponPicker" aria-label="Close weapon picker">×</button>
+            <span class="section-kicker">MOBILE CONTROLS</span>
+            <h2>Choose your weapon</h2>
+            <p>Pick your move without leaving the battle screen.</p>
+            <div class="mobile-choices">
+                <button class="choice mobile-choice" data-choice="rock"><div class="emoji">✊</div><strong>Rock</strong><small>Crushes scissors</small></button>
+                <button class="choice mobile-choice" data-choice="paper"><div class="emoji">✋</div><strong>Paper</strong><small>Covers rock</small></button>
+                <button class="choice mobile-choice" data-choice="scissors"><div class="emoji">✌️</div><strong>Scissors</strong><small>Cuts paper</small></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="profile-modal" id="notifModal" role="dialog" aria-modal="true">
+        <div class="profile-card modal-panel">
+            <button class="modal-x" id="closeNotif" aria-label="Close notifications">×</button>
+            <div class="modal-heading row-heading">
+                <div>
+                    <span class="section-kicker">INBOX</span>
+                    <h2>Game Requests</h2>
+                    <p>Challenges and match invitations.</p>
+                </div>
+                <button class="small-action" id="markNotifReadBtn">Mark all read</button>
+            </div>
+            <div id="notifList" class="notification-list"><div class="empty-state">No requests yet.</div></div>
+        </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="profile-modal" id="settingsModal" role="dialog" aria-modal="true">
+        <div class="settings-container">
+            <aside class="settings-sidebar">
+                <div class="settings-brand">
+                    <div class="brand-mark small">W</div>
+                    <div><strong>Settings</strong><span>Customize your arena</span></div>
+                </div>
+                <button class="settings-tab active" data-tab="personal"><span></span> Account</button>
+                <button class="settings-tab" data-tab="appearance"><span></span> Appearance</button>
+                <button class="settings-tab" data-tab="notifications"><span></span> Notifications</button>
+                <button class="settings-tab" data-tab="security"><span></span> Security</button>
+                <button class="settings-tab" data-tab="privacy"><span></span> Privacy</button>
+                <button class="settings-tab settings-danger-tab" data-tab="danger"><span></span> Danger Zone</button>
+            </aside>
+
+            <section class="settings-content">
+                <button class="modal-x" id="closeSettings" aria-label="Close settings">×</button>
+
+                <div class="tab-content active" id="personal">
+                    <div class="modal-heading">
+                        <span class="section-kicker">ACCOUNT</span>
+                        <h2>Account & Identity</h2>
+                        <p>Manage the information other players see.</p>
+                    </div>
+                    <div class="settings-card account-card">
+                        <div class="account-row">
+                            <img id="settingsProfileImage" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                            <div><strong id="settingsDisplayName">Player</strong><span id="settingsEmail">Email: —</span><span id="settingsUID">User ID: —</span></div>
+                            <button id="copyUidBtn" class="small-action">Copy ID</button>
+                        </div>
+                        <label>Username<input type="text" id="newUsername" placeholder="New username" maxlength="24"></label>
+                        <button id="changeUsernameBtn" class="primary-btn">Save username</button>
+                    </div>
+                    <div class="settings-card">
+                        <div class="card-title-row"><div><h3>Profile export</h3><p>Save your public profile and stats as a JSON backup.</p></div><button id="exportProfileBtn" class="secondary-btn">Export profile</button></div>
+                        <button id="resetSettingsBtn" class="text-btn">Reset app preferences</button>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="appearance">
+                    <div class="modal-heading">
+                        <span class="section-kicker">LOOK & FEEL</span>
+                        <h2>Appearance</h2>
+                        <p>Switch themes and tune the arena experience.</p>
+                    </div>
+                    <div class="settings-card">
+                        <h3>Theme</h3>
+                        <div class="segmented">
+                            <button id="themeDarkBtn" class="segment active">🌙 Dark</button>
+                            <button id="themeLightBtn" class="segment">☀ Light</button>
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="toggle-row"><div><h3>Reduce motion</h3><p>Use softer transitions and fewer effects.</p></div><label class="switch"><input type="checkbox" id="reducedMotion"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Compact game cards</h3><p>Reduce spacing for smaller screens and laptops.</p></div><label class="switch"><input type="checkbox" id="compactMode"><span></span></label></div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="notifications">
+                    <div class="modal-heading">
+                        <span class="section-kicker">ALERTS</span>
+                        <h2>Notifications</h2>
+                        <p>Choose how WHITE_RPS keeps you informed.</p>
+                    </div>
+                    <div class="settings-card">
+                        <div class="toggle-row"><div><h3>Sound effects</h3><p>Buttons, alerts, and battle sounds.</p></div><label class="switch"><input type="checkbox" id="soundEnabled"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Challenge notifications</h3><p>Allow challenge sounds and badges.</p></div><label class="switch"><input type="checkbox" id="challengeNotifications"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Desktop notifications</h3><p>Show browser alerts when a challenge arrives.</p></div><label class="switch"><input type="checkbox" id="desktopNotifications"><span></span></label></div>
+                        <div class="range-row"><div><h3>Notification volume</h3><p>Adjust alert volume.</p></div><input type="range" id="notificationVolume" min="0" max="1" step="0.05"></div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="security">
+                    <div class="modal-heading">
+                        <span class="section-kicker">SECURITY</span>
+                        <h2>Security</h2>
+                        <p>Keep your account credentials under control.</p>
+                    </div>
+                    <div class="settings-card">
+                        <label>Current password<input type="password" id="currentPassword" autocomplete="current-password" placeholder="Enter current password"></label>
+                        <label>New password<input type="password" id="newPassword" autocomplete="new-password" placeholder="At least 6 characters"></label>
+                        <label>Confirm password<input type="password" id="confirmPassword" autocomplete="new-password" placeholder="Repeat new password"></label>
+                        <button id="changePasswordBtn" class="primary-btn">Update Password</button>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="privacy">
+                    <div class="modal-heading">
+                        <span class="section-kicker">PRIVACY</span>
+                        <h2>Privacy & Social</h2>
+                        <p>Control what other players can see and do.</p>
+                    </div>
+                    <div class="settings-card">
+                        <div class="toggle-row"><div><h3>Show online status</h3><p>Let other players see when you are active.</p></div><label class="switch"><input type="checkbox" id="onlineStatus"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Allow game requests</h3><p>Let players challenge you to a match.</p></div><label class="switch"><input type="checkbox" id="gameRequest"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Enter sends chat</h3><p>Press Enter to send; Shift + Enter adds a new line.</p></div><label class="switch"><input type="checkbox" id="enterToSend"><span></span></label></div>
+                        <button id="savePrivacyBtn" class="primary-btn">Save privacy settings</button>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="danger">
+                    <div class="modal-heading">
+                        <span class="section-kicker danger-text">DANGER ZONE</span>
+                        <h2>Delete account</h2>
+                        <p>This permanently removes your account profile from Firebase.</p>
+                    </div>
+                    <div class="settings-card danger-card">
+                        <h3>Permanently delete account</h3>
+                        <p>This action cannot be undone. Your authentication account and public profile will be removed.</p>
+                        <button id="deleteAccountBtn" class="danger-btn">Delete Account</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="profile-modal" id="leaderboardModal" role="dialog" aria-modal="true">
+        <div class="profile-card leaderboard-panel">
+            <button class="modal-x" id="closeLeaderboard" aria-label="Close leaderboards">×</button>
+            <div class="modal-heading row-heading">
+                <div>
+                    <span class="section-kicker">COMPETITIVE</span>
+                    <h2>Leaderboards</h2>
+                    <p>See who is leading the arena.</p>
+                </div>
+                <select id="leaderboardSort" class="sort-select">
+                    <option value="wins">Most wins</option>
+                    <option value="games">Most games</option>
+                    <option value="rate">Best win rate</option>
+                </select>
+            </div>
+            <div id="leaderboardPodium" class="leaderboard-podium"></div>
+            <div class="leaderboard-me" id="leaderboardMe"></div>
+            <div id="leaderboardList" class="leaderboard-list"><div class="empty-state">Loading…</div></div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

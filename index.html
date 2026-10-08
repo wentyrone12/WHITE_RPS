@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#070b10">
+    <title>WHITE_RPS</title>
+    <link rel="icon" href="white.png">
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+    <section class="login-container">
+        <div class="brand-panel">
+            <div>
+                <span class="brand-kicker">ONLINE COMPETITIVE ARENA</span>
+                <h1>WHITE_<span>RPS</span></h1>
+                <p>Play quick matches, challenge friends, climb the leaderboard, and stay connected through live chat.
+                </p>
+                <div class="brand-features">
+                    <div class="brand-feature"><i class="feature-dot"></i> Realtime multiplayer challenges</div>
+                    <div class="brand-feature"><i class="feature-dot"></i> Live player leaderboards</div>
+                    <div class="brand-feature"><i class="feature-dot"></i> Realtime private messaging</div>
+                    <div class="brand-feature"><i class="feature-dot"></i> Responsive on desktop & mobile</div>
+                </div>
+            </div>
+            <span class="brand-kicker">WHITE_RPS • PLAY SMART</span>
+        </div>
+
+        <div class="login-form-panel">
+            <form class="form-inner" id="loginForm">
+                <h2>Welcome back</h2>
+                <p class="sub">Sign in to enter the arena.</p>
+
+                <div class="input-wrap">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="WHITE_RPS@example.com" autocomplete="email">
+                </div>
+                <div class="input-wrap">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
+                </div>
+
+                <button type="submit" id="loginBtn">ENTER ARENA ↗</button>
+                <button type="button" class="google-auth-btn" id="googleSignInBtn"><svg viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                        <path fill="#4285F4"
+                            d="M21.35 12.27c0-.68-.06-1.33-.18-1.96H12v3.71h5.23a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.92-4.18 2.92-7.12Z" />
+                        <path fill="#34A853"
+                            d="M12 21.75c2.64 0 4.86-.88 6.48-2.36l-3.14-2.44c-.87.58-1.98.92-3.34.92-2.56 0-4.73-1.73-5.51-4.05H3.25v2.52A9.79 9.79 0 0 0 12 21.75Z" />
+                        <path fill="#FBBC05"
+                            d="M6.49 13.82A5.89 5.89 0 0 1 6.18 12c0-.63.11-1.24.31-1.82V7.66H3.25A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.06 1 4.34l3.24-2.52Z" />
+                        <path fill="#EA4335"
+                            d="M12 6.13c1.43 0 2.71.49 3.72 1.46l2.79-2.79C16.86 3.2 14.64 2.25 12 2.25a9.79 9.79 0 0 0-8.75 5.41l3.24 2.52C7.27 7.86 9.44 6.13 12 6.13Z" />
+                    </svg>
+                    Continue with Google</button>
+
+                <div class="auth-divider"><span>OR</span></div>
+                <div class="links">
+                    <button type="button" id="openSignup">CREATE ACCOUNT</button>
+                    <button type="button" id="openForgot">FORGOT PASSWORD</button>
+                </div>
+                <p class="form-note">By continuing, you agree to use WHITE_RPS respectfully and fairly.</p>
+            </form>
+        </div>
+    </section>
+
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <button class="modal-close-x" id="closeSignup" aria-label="Close">×</button>
+            <h2>Create account</h2>
+            <div class="modal-security-note">Your password is securely handled by Security Authentication.</div>
+            <input type="text" id="signupUsername" placeholder="Username" maxlength="24" autocomplete="username">
+            <input type="email" id="signupEmail" placeholder="Email" autocomplete="email">
+            <div class="password-field-row">
+                <input type="password" id="signupPassword" placeholder="Password (8+ characters)"
+                    autocomplete="new-password">
+                <button type="button" class="password-toggle" data-target="signupPassword"
+                    aria-label="Show password">◉</button>
+            </div>
+            <div class="password-strength" id="passwordStrength"><span></span><small>Password strength: —</small></div>
+            <div class="password-field-row">
+                <input type="password" id="signupConfirmPassword" placeholder="Confirm password"
+                    autocomplete="new-password">
+                <button type="button" class="password-toggle" data-target="signupConfirmPassword"
+                    aria-label="Show password">◉</button>
+            </div>
+            <label class="rules-check">
+                <input type="checkbox" id="agreeRuless">
+                <span style="position: relative; left: -35px;">I agree to the <button type="button" id="openRules" class="inline-link">WHITE_RPS Fair Play
+                        Rules</button>.</span>
+            </label>
+            <button class="action" id="signupBtn">CREATE ACCOUNT</button>
+            <button type="button" class="google-auth-btn modal-google" id="googleSignUpBtn"><svg viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                    <path fill="#4285F4"
+                        d="M21.35 12.27c0-.68-.06-1.33-.18-1.96H12v3.71h5.23a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.92-4.18 2.92-7.12Z" />
+                    <path fill="#34A853"
+                        d="M12 21.75c2.64 0 4.86-.88 6.48-2.36l-3.14-2.44c-.87.58-1.98.92-3.34.92-2.56 0-4.73-1.73-5.51-4.05H3.25v2.52A9.79 9.79 0 0 0 12 21.75Z" />
+                    <path fill="#FBBC05"
+                        d="M6.49 13.82A5.89 5.89 0 0 1 6.18 12c0-.63.11-1.24.31-1.82V7.66H3.25A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.06 1 4.34l3.24-2.52Z" />
+                    <path fill="#EA4335"
+                        d="M12 6.13c1.43 0 2.71.49 3.72 1.46l2.79-2.79C16.86 3.2 14.64 2.25 12 2.25a9.79 9.79 0 0 0-8.75 5.41l3.24 2.52C7.27 7.86 9.44 6.13 12 6.13Z" />
+                </svg> Sign up with Google</button>
+            <button class="closeBtn" type="button" id="closeSignupBottom">CANCEL</button>
+        </div>
+    </div>
+
+    <div class="modal" id="forgotModal">
+        <div class="modal-content">
+            <button class="modal-close-x" id="closeForgot" aria-label="Close">×</button>
+            <h2>Reset password</h2>
+            <p>Enter your account email and we’ll send the reset link.</p>
+            <input type="email" id="forgotEmail" placeholder="WHITE_RPS@example.com" autocomplete="email">
+            <button class="action" id="forgotBtn">SEND RESET LINK</button>
+            <button class="closeBtn" type="button" id="closeForgotBottom">CANCEL</button>
+        </div>
+    </div>
+
+    <div class="modal" id="rulesModal" aria-hidden="true">
+        <div class="modal-content rules-modal">
+            <button class="modal-close-x" id="closeRules" aria-label="Close rules">×</button>
+            <span class="brand-kicker">WHITE_RPS COMMUNITY</span>
+            <h2>Fair Play Rules</h2>
+            <p>Keep the arena competitive, friendly, and safe.</p>
+            <div class="rules-list">
+                <div><strong>01</strong><span>No harassment, threats, or abusive messages.</span></div>
+                <div><strong>02</strong><span>No cheating, exploits, or intentional abuse of game systems.</span></div>
+                <div><strong>03</strong><span>Respect other players and keep challenges sportsmanlike.</span></div>
+                <div><strong>04</strong><span>You are responsible for protecting your account credentials.</span></div>
+            </div>
+            <button class="action" id="acceptRulesBtn">I UNDERSTAND</button>
+        </div>
+    </div>
+
+    <div class="tagname">Made by Wenxyz</div>
+    <script type="module" src="login.js"></script>
+</body>
+
+</html>
