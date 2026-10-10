@@ -50,7 +50,35 @@ const els = {
     leaderboardBtn: $("leaderboardBtn"),
     quickLeaderboardBtn: $("quickLeaderboardBtn"),
     chatBtn: $("chatBtn"),
+    publicChatBtn: $("publicChatBtn"),
     settingsBtn: $("settingsBtn"),
+    installAppBtn: $("installAppBtn"),
+    installAppLabel: $("installAppLabel"),
+    installHelpModal: $("installHelpModal"),
+    closeInstallHelp: $("closeInstallHelp"),
+    installHelpTitle: $("installHelpTitle"),
+    installHelpDescription: $("installHelpDescription"),
+    installStepOne: $("installStepOne"),
+    installStepTwo: $("installStepTwo"),
+    installStepThree: $("installStepThree"),
+    installHelpNote: $("installHelpNote"),
+    installHelpTryBtn: $("installHelpTryBtn"),
+    pinLockModal: $("pinLockModal"),
+    closePinLock: $("closePinLock"),
+    cancelPinLock: $("cancelPinLock"),
+    pinLockForm: $("pinLockForm"),
+    pinLockEmblem: $("pinLockEmblem"),
+    pinLockEyebrow: $("pinLockEyebrow"),
+    pinLockTitle: $("pinLockTitle"),
+    pinLockDescription: $("pinLockDescription"),
+    pinLockChatName: $("pinLockChatName"),
+    pinPrimaryLabel: $("pinPrimaryLabel"),
+    pinPrimaryInput: $("pinPrimaryInput"),
+    pinConfirmField: $("pinConfirmField"),
+    pinConfirmInput: $("pinConfirmInput"),
+    pinLockFeedback: $("pinLockFeedback"),
+    submitPinLock: $("submitPinLock"),
+    appToastContainer: $("appToastContainer"),
     logoutBtn: $("logoutBtn"),
 
     miniProfileImage: $("miniProfileImage"),
@@ -133,6 +161,15 @@ const els = {
     chatListSearch: $("chatListSearch"),
     chatList: $("chatList"),
     chatBadge: $("chatBadge"),
+    conversationMenu: $("conversationMenu"),
+
+    publicChatModal: $("publicChatModal"),
+    closePublicChat: $("closePublicChat"),
+    publicChatMessages: $("publicChatMessages"),
+    publicChatInput: $("publicChatInput"),
+    publicChatCharCount: $("publicChatCharCount"),
+    publicSendBtn: $("publicSendBtn"),
+    publicChallengeBtn: $("publicChallengeBtn"),
 
     chatModal: $("chatModal"),
     closeChat: $("closeChat"),
@@ -213,6 +250,11 @@ let chatUnsubscribe = null;
 let chatTypingUnsubscribe = null;
 let chatTypingTimer = null;
 let chatListUnsubscribe = null;
+let publicChatUnsubscribe = null;
+let activeConversationMenuChat = null;
+const unlockedChatSessions = new Set();
+let activePinLockChat = null;
+let activePinLockMode = "create";
 let notifUnsubscribe = null;
 let responseUnsubscribe = null;
 
@@ -345,6 +387,7 @@ function openModal(modal) {
 
 function closeModal(modal) {
     if (!modal) return;
+    if (modal === els.publicChatModal && typeof stopPublicChatListener === "function") stopPublicChatListener();
     modal.style.display = "none";
     modal.setAttribute("aria-hidden", "true");
 }
@@ -369,7 +412,7 @@ function openNavigationModal(modal) {
 
 function playClick() {
     if (!prefs.soundEnabled) return;
-    sounds.click.currentTime = 0;
+    sounds.click.currentTime = 2;
     sounds.click.play().catch(() => {});
 }
 
@@ -384,6 +427,22 @@ function startBattleSound() {
     sounds.battle.currentTime = 0.25;
     sounds.battle.play().catch(() => {});
 }
+
+
+function showAppToast(message, type = "success", duration = 3300) {
+    if (!els.appToastContainer) return;
+    const toast = document.createElement("div");
+    toast.className = `app-toast${type && type !== "success" ? ` ${type}` : ""}`;
+    toast.setAttribute("role", "status");
+    toast.textContent = String(message || "Done.");
+    els.appToastContainer.appendChild(toast);
+    window.setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(6px)";
+        window.setTimeout(() => toast.remove(), 220);
+    }, duration);
+}
+
 
 function stopBattleSound() {
     sounds.battle.pause();
@@ -727,7 +786,7 @@ els.newChatBtn.addEventListener("click", () => {
     setTimeout(() => els.searchInput.focus(), 60);
 });
 
-els.closeChatList.addEventListener("click", () => closeModal(els.chatListModal));
+els.closeChatList.addEventListener("click", () => { hideConversationMenu(); closeModal(els.chatListModal); });
 
 els.startChatBtn.addEventListener("click", () => {
     currentChatUID = els.startChatBtn.dataset.uid || "";
@@ -788,7 +847,8 @@ async function markChatRead() {
     const user = auth.currentUser;
     if (!user || !currentChatUID) return;
     await update(ref(database, `chatList/${user.uid}/${currentChatUID}`), {
-        readAt: Date.now()
+        readAt: Date.now(),
+        manualUnread: false
     });
 }
 
@@ -1041,53 +1101,344 @@ async function openChatUserProfile() {
     openUserProfile(user);
 }
 
+function getLocalChatLocks() {
+    try {
+        return JSON.parse(localStorage.getItem(`whiteRpsChatLocks:${auth.currentUser?.uid || "guest"}`) || "{}");
+    } catch {
+        return {};
+    }
+}
+
+function saveLocalChatLocks(locks) {
+    localStorage.setItem(`whiteRpsChatLocks:${auth.currentUser?.uid || "guest"}`, JSON.stringify(locks));
+}
+
+function isChatLocked(uid) {
+    return Boolean(getLocalChatLocks()[uid]);
+}
+
+async function digestLegacyChatPin(pin, salt) {
+    if (!globalThis.crypto?.subtle) throw new Error("Conversation lock requires a secure browser context (HTTPS).");
+    const bytes = new TextEncoder().encode(`${salt}:${pin}`);
+    const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function digestChatPin(pin, salt, iterations = 120000) {
+    if (!globalThis.crypto?.subtle) throw new Error("Conversation lock requires a secure browser context (HTTPS).");
+    const encoder = new TextEncoder();
+    const keyMaterial = await globalThis.crypto.subtle.importKey(
+        "raw", encoder.encode(pin), "PBKDF2", false, ["deriveBits"]
+    );
+    const derived = await globalThis.crypto.subtle.deriveBits({
+        name: "PBKDF2",
+        salt: encoder.encode(salt),
+        iterations,
+        hash: "SHA-256"
+    }, keyMaterial, 256);
+    return [...new Uint8Array(derived)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function verifyChatPin(uid, pin) {
+    const lock = getLocalChatLocks()[uid];
+    if (!lock) return true;
+    // Preserve locks saved by the earlier SHA-256 format; newly created locks use PBKDF2.
+    const candidate = lock.algorithm === "PBKDF2-SHA-256"
+        ? await digestChatPin(pin, lock.salt, Number(lock.iterations) || 120000)
+        : await digestLegacyChatPin(pin, lock.salt);
+    return candidate === lock.hash;
+}
+
+function openPinLockModal(mode, chat) {
+    if (!els.pinLockModal || !chat?.uid) return;
+    activePinLockChat = chat;
+    activePinLockMode = mode;
+    const copy = {
+        create: {
+            emblem: "🔐", eyebrow: "PRIVATE CONVERSATION", title: "Lock conversation",
+            description: "Create a 4–8 digit PIN to add a local privacy lock to this conversation on this device.",
+            label: "Create a 4–8 digit PIN", placeholder: "Enter 4–8 digits", submit: "Lock conversation", autocomplete: "new-password", showConfirm: true
+        },
+        open: {
+            emblem: "🔓", eyebrow: "PIN REQUIRED", title: "Unlock conversation",
+            description: "Enter the PIN for this conversation to open it for this session.",
+            label: "Conversation PIN", placeholder: "Enter your PIN", submit: "Unlock & open", autocomplete: "current-password", showConfirm: false
+        },
+        remove: {
+            emblem: "🛡️", eyebrow: "LOCK SETTINGS", title: "Remove conversation lock",
+            description: "Verify your existing PIN before removing the local lock from this device.",
+            label: "Current conversation PIN", placeholder: "Enter your PIN", submit: "Remove lock", autocomplete: "current-password", showConfirm: false
+        }
+    }[mode] || null;
+    if (!copy) return;
+
+    els.pinLockEmblem.textContent = copy.emblem;
+    els.pinLockEyebrow.textContent = copy.eyebrow;
+    els.pinLockTitle.textContent = copy.title;
+    els.pinLockDescription.textContent = copy.description;
+    els.pinLockChatName.textContent = chat.username || "Player";
+    els.pinPrimaryLabel.textContent = copy.label;
+    els.pinPrimaryInput.placeholder = copy.placeholder;
+    els.pinPrimaryInput.autocomplete = copy.autocomplete;
+    els.pinPrimaryInput.value = "";
+    els.pinConfirmInput.value = "";
+    els.pinConfirmField.classList.toggle("hidden", !copy.showConfirm);
+    els.pinConfirmInput.required = copy.showConfirm;
+    els.pinPrimaryInput.minLength = mode === "create" ? 4 : 4;
+    els.pinLockFeedback.textContent = "";
+    els.pinLockFeedback.classList.remove("success");
+    els.submitPinLock.textContent = copy.submit;
+    els.submitPinLock.disabled = false;
+    openModal(els.pinLockModal);
+    window.setTimeout(() => els.pinPrimaryInput.focus(), 70);
+}
+
+function closePinLockModal() {
+    closeModal(els.pinLockModal);
+    if (els.pinLockForm) els.pinLockForm.reset();
+    if (els.pinLockFeedback) {
+        els.pinLockFeedback.textContent = "";
+        els.pinLockFeedback.classList.remove("success");
+    }
+    activePinLockChat = null;
+}
+
+async function openListedConversation(chat) {
+    if (!chat?.uid) return;
+    if (isChatLocked(chat.uid) && !unlockedChatSessions.has(chat.uid)) {
+        openPinLockModal("open", chat);
+        return;
+    }
+    currentChatUID = chat.uid;
+    currentChatName = chat.username || "Player";
+    currentChatImage = chat.image || DEFAULT_AVATAR;
+    await openChat();
+}
+
+function showConversationMenu(chat, trigger) {
+    const menu = els.conversationMenu;
+    if (!menu || !chat || !trigger) return;
+    activeConversationMenuChat = chat;
+    const isPinned = Boolean(chat.pinned);
+    const unread = Boolean(chat.manualUnread) || Number(chat.lastTimestamp || 0) > Number(chat.readAt || 0);
+    const locked = isChatLocked(chat.uid);
+    const pinButton = menu.querySelector('[data-conversation-action="pin"]');
+    const unreadButton = menu.querySelector('[data-conversation-action="unread"]');
+    const lockButton = menu.querySelector('[data-conversation-action="lock"]');
+    pinButton.textContent = isPinned ? "📌 Unpin conversation" : "📌 Pin conversation";
+    unreadButton.textContent = unread ? "✓ Mark as read" : "✉ Mark as unread";
+    lockButton.textContent = locked ? "🔓 Unlock conversation" : "🔒 Lock conversation";
+    const rect = trigger.getBoundingClientRect();
+    menu.classList.remove("hidden");
+    menu.style.visibility = "hidden";
+    const menuRect = menu.getBoundingClientRect();
+    const left = Math.max(8, Math.min(window.innerWidth - menuRect.width - 8, rect.right - menuRect.width));
+    const top = rect.bottom + menuRect.height + 8 <= window.innerHeight ? rect.bottom + 5 : Math.max(8, rect.top - menuRect.height - 5);
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    menu.style.visibility = "visible";
+}
+
+function hideConversationMenu() {
+    els.conversationMenu?.classList.add("hidden");
+    activeConversationMenuChat = null;
+}
+
+function configureConversationLock(chat) {
+    if (!chat?.uid) return;
+    openPinLockModal(isChatLocked(chat.uid) ? "remove" : "create", chat);
+}
+
+els.closePinLock?.addEventListener("click", closePinLockModal);
+els.cancelPinLock?.addEventListener("click", closePinLockModal);
+els.pinPrimaryInput?.addEventListener("input", () => {
+    els.pinPrimaryInput.value = els.pinPrimaryInput.value.replace(/\D/g, "").slice(0, 8);
+    els.pinLockFeedback.textContent = "";
+    els.pinLockFeedback.classList.remove("success");
+});
+els.pinConfirmInput?.addEventListener("input", () => {
+    els.pinConfirmInput.value = els.pinConfirmInput.value.replace(/\D/g, "").slice(0, 8);
+    els.pinLockFeedback.textContent = "";
+    els.pinLockFeedback.classList.remove("success");
+});
+els.pinLockForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const chat = activePinLockChat;
+    const mode = activePinLockMode;
+    const pin = els.pinPrimaryInput.value.trim();
+    const confirmPin = els.pinConfirmInput.value.trim();
+    if (!chat?.uid || !auth.currentUser) {
+        els.pinLockFeedback.textContent = "Please sign in again before changing a conversation lock.";
+        return;
+    }
+    if (!/^\d{4,8}$/.test(pin)) {
+        els.pinLockFeedback.textContent = "Enter a PIN containing 4–8 digits.";
+        els.pinPrimaryInput.focus();
+        return;
+    }
+    if (mode === "create" && pin !== confirmPin) {
+        els.pinLockFeedback.textContent = "The PIN entries do not match. Check both fields and try again.";
+        els.pinConfirmInput.focus();
+        return;
+    }
+
+    els.submitPinLock.disabled = true;
+    els.submitPinLock.textContent = "Please wait…";
+    els.pinLockFeedback.textContent = "Verifying securely on this device…";
+    try {
+        if (mode === "create") {
+            const locks = getLocalChatLocks();
+            const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+            const salt = [...saltBytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+            const iterations = 120000;
+            locks[chat.uid] = {
+                salt,
+                hash: await digestChatPin(pin, salt, iterations),
+                algorithm: "PBKDF2-SHA-256",
+                iterations,
+                createdAt: Date.now()
+            };
+            saveLocalChatLocks(locks);
+            unlockedChatSessions.delete(chat.uid);
+            renderChatList(cachedChats);
+            closePinLockModal();
+            showAppToast(`Conversation with ${chat.username || "Player"} is locked on this device.`, "success");
+            return;
+        }
+
+        const valid = await verifyChatPin(chat.uid, pin);
+        if (!valid) {
+            els.pinLockFeedback.textContent = "That PIN is incorrect. Try again.";
+            els.pinPrimaryInput.value = "";
+            els.pinPrimaryInput.focus();
+            return;
+        }
+
+        if (mode === "remove") {
+            const locks = getLocalChatLocks();
+            delete locks[chat.uid];
+            saveLocalChatLocks(locks);
+            unlockedChatSessions.delete(chat.uid);
+            renderChatList(cachedChats);
+            closePinLockModal();
+            showAppToast(`Conversation with ${chat.username || "Player"} is now unlocked on this device.`, "success");
+            return;
+        }
+
+        if (mode === "open") {
+            unlockedChatSessions.add(chat.uid);
+            currentChatUID = chat.uid;
+            currentChatName = chat.username || "Player";
+            currentChatImage = chat.image || DEFAULT_AVATAR;
+            closePinLockModal();
+            await openChat();
+            return;
+        }
+    } catch (error) {
+        els.pinLockFeedback.textContent = error?.message || "Could not update the conversation lock. Please try again.";
+    } finally {
+        if (els.pinLockModal?.style.display === "flex") {
+            els.submitPinLock.disabled = false;
+            const buttonText = mode === "create" ? "Lock conversation" : mode === "open" ? "Unlock & open" : "Remove lock";
+            els.submitPinLock.textContent = buttonText;
+        }
+    }
+});
+
+els.conversationMenu?.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-conversation-action]");
+    const chat = activeConversationMenuChat;
+    if (!button || !chat || !auth.currentUser) return;
+    const action = button.dataset.conversationAction;
+    hideConversationMenu();
+    const chatRef = ref(database, `chatList/${auth.currentUser.uid}/${chat.uid}`);
+    try {
+        if (action === "pin") {
+            await update(chatRef, { pinned: !chat.pinned });
+        } else if (action === "unread") {
+            const isUnread = Boolean(chat.manualUnread) || Number(chat.lastTimestamp || 0) > Number(chat.readAt || 0);
+            if (isUnread) {
+                await update(chatRef, { manualUnread: false, readAt: Date.now() });
+            } else {
+                await update(chatRef, { manualUnread: true, readAt: 0 });
+            }
+        } else if (action === "lock") {
+            await configureConversationLock(chat);
+        } else if (action === "delete") {
+            const ok = confirm(`Delete the conversation with ${chat.username || "this player"} from your message list? The other person's copy and stored messages will not be deleted.`);
+            if (ok) {
+                if (chat.uid === currentChatUID) {
+                    stopChatListeners();
+                    closeModal(els.chatModal);
+                    currentChatUID = "";
+                }
+                await remove(chatRef);
+                unlockedChatSessions.delete(chat.uid);
+                const locks = getLocalChatLocks();
+                delete locks[chat.uid];
+                saveLocalChatLocks(locks);
+            }
+        }
+    } catch (error) {
+        alert(error.message || "Could not update this conversation.");
+    }
+});
+
+document.addEventListener("click", (event) => {
+    if (!event.target.closest("#conversationMenu") && !event.target.closest("[data-chat-more]")) hideConversationMenu();
+});
+window.addEventListener("resize", hideConversationMenu);
+window.addEventListener("scroll", hideConversationMenu, true);
+
 function renderChatList(chats = cachedChats) {
     cachedChats = chats;
     const filter = normalizeUsername(els.chatListSearch.value);
     els.chatList.innerHTML = "";
 
-    const filtered = chats.filter((chat) =>
-        normalizeUsername(chat.username).includes(filter)
-    );
+    const locks = getLocalChatLocks();
+    const visibleChats = chats.filter((chat) => chat && chat.uid && !chat.deletedForMe);
+    const filtered = visibleChats.filter((chat) => normalizeUsername(chat.username).includes(filter));
+    filtered.sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || Number(b.lastTimestamp || 0) - Number(a.lastTimestamp || 0));
 
     if (!filtered.length) {
-        els.chatList.innerHTML = `<div class="empty-state">${filter ? "No matching conversations." : "No chats yet. Start a new conversation."}</div>`;
+        els.chatList.innerHTML = `<div class="empty-state">${filter ? "No matching conversations." : "No conversations yet. Start a new chat."}</div>`;
+        const totalUnreadEmpty = visibleChats.filter((chat) => Boolean(chat.manualUnread) || Number(chat.lastTimestamp || 0) > Number(chat.readAt || 0)).length;
+        els.chatBadge.classList.toggle("hidden", totalUnreadEmpty === 0);
+        els.chatBadge.textContent = totalUnreadEmpty > 99 ? "99+" : String(totalUnreadEmpty);
         return;
     }
 
-    let unreadCount = 0;
-
     filtered.forEach((chat) => {
-        const unread = Number(chat.lastTimestamp || 0) > Number(chat.readAt || 0) && chat.uid !== currentChatUID;
-        if (unread) unreadCount++;
-
+        const unread = Boolean(chat.manualUnread) || (Number(chat.lastTimestamp || 0) > Number(chat.readAt || 0) && chat.uid !== currentChatUID);
+        const locked = Boolean(locks[chat.uid]);
         const item = document.createElement("div");
-        item.className = "chat-item";
+        item.className = `chat-item${chat.pinned ? " conversation-pinned" : ""}${unread ? " conversation-unread" : ""}`;
+        item.dataset.uid = chat.uid;
         item.innerHTML = `
             <img src="${escapeHTML(chat.image || DEFAULT_AVATAR)}" alt="">
             <div class="chat-item-copy">
-                <strong>${escapeHTML(chat.username || "Player")}</strong>
+                <strong>${chat.pinned ? '<span class="chat-pin-icon" aria-label="Pinned">📌 </span>' : ""}${locked ? '<span class="chat-lock-icon" aria-label="Locked">🔒 </span>' : ""}${escapeHTML(chat.username || "Player")}</strong>
                 <p>${escapeHTML(chat.lastMessage || "Start chatting…")}</p>
             </div>
             <div class="chat-item-meta">
                 <span class="chat-time">${escapeHTML(formatRelativeTime(chat.lastTimestamp))}</span>
                 ${unread ? '<span class="unread-dot"></span>' : ""}
             </div>
+            <button type="button" class="conversation-more-btn" data-chat-more aria-label="Conversation options" title="Conversation options">⋮</button>
         `;
-
-        item.addEventListener("click", () => {
-            currentChatUID = chat.uid;
-            currentChatName = chat.username || "Player";
-            currentChatImage = chat.image || DEFAULT_AVATAR;
-            openChat();
+        const more = item.querySelector("[data-chat-more]");
+        more.addEventListener("click", (event) => {
+            event.stopPropagation();
+            showConversationMenu(chat, more);
         });
-
+        item.addEventListener("click", (event) => {
+            if (event.target.closest("[data-chat-more]")) return;
+            openListedConversation(chat);
+        });
         els.chatList.appendChild(item);
     });
 
-    const totalUnread = chats.filter((chat) =>
-        Number(chat.lastTimestamp || 0) > Number(chat.readAt || 0)
-    ).length;
+    const totalUnread = visibleChats.filter((chat) => Boolean(chat.manualUnread) || Number(chat.lastTimestamp || 0) > Number(chat.readAt || 0)).length;
     els.chatBadge.classList.toggle("hidden", totalUnread === 0);
     els.chatBadge.textContent = totalUnread > 99 ? "99+" : String(totalUnread);
 }
@@ -1099,14 +1450,174 @@ function loadChats() {
     chatListUnsubscribe = onValue(ref(database, `chatList/${auth.currentUser.uid}`), (snapshot) => {
         const chats = [];
         if (snapshot.exists()) {
-            snapshot.forEach((snap) => chats.push(snap.val() || {}));
+            snapshot.forEach((snap) => chats.push({ ...(snap.val() || {}), uid: snap.key }));
         }
         chats.sort((a, b) => Number(b.lastTimestamp || 0) - Number(a.lastTimestamp || 0));
         cachedChats = chats;
         renderChatList(cachedChats);
+    }, (error) => {
+        els.chatList.innerHTML = `<div class="empty-state">Could not load conversations: ${escapeHTML(error.message || "permission denied")}</div>`;
     });
 }
 els.chatListSearch.addEventListener("input", () => renderChatList(cachedChats));
+
+/* PUBLIC GLOBAL CHAT */
+function stopPublicChatListener() {
+    if (typeof publicChatUnsubscribe === "function") {
+        publicChatUnsubscribe();
+        publicChatUnsubscribe = null;
+    }
+}
+
+function formatPublicMessage(message) {
+    const me = auth.currentUser;
+    const mine = message.senderUID === me?.uid;
+    const row = document.createElement("div");
+    row.className = `public-message-row${mine ? " public-message-mine" : ""}${message.type === "challenge" ? " public-message-challenge" : ""}`;
+
+    const avatar = document.createElement("img");
+    avatar.className = "public-message-avatar";
+    avatar.src = message.senderImage || DEFAULT_AVATAR;
+    avatar.alt = "";
+
+    const stack = document.createElement("div");
+    stack.className = "public-message-stack";
+    const bubble = document.createElement("div");
+    bubble.className = `public-message-bubble${mine ? " public-message-my-bubble" : ""}${message.type === "challenge" ? " public-challenge-bubble" : ""}`;
+
+    const name = document.createElement("strong");
+    name.className = "public-message-name";
+    name.textContent = mine ? `${message.senderName || "You"} · You` : (message.senderName || "Player");
+    bubble.appendChild(name);
+
+    const text = document.createElement("p");
+    if (message.type === "challenge") {
+        text.textContent = "⚔ Challenge anyone in the arena to a Rock Paper Scissors match!";
+        const small = document.createElement("small");
+        small.textContent = "Anyone can accept this challenge to send a direct match request.";
+        bubble.append(text, small);
+    } else {
+        text.textContent = message.text || "";
+        bubble.appendChild(text);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "public-message-meta";
+    const time = document.createElement("span");
+    time.textContent = formatTime(message.time);
+    meta.appendChild(time);
+
+    if (message.type === "challenge" && !mine) {
+        const accept = document.createElement("button");
+        accept.type = "button";
+        accept.className = "public-accept-challenge";
+        accept.textContent = "Accept challenge";
+        accept.addEventListener("click", async () => {
+            accept.disabled = true;
+            try {
+                const sent = await sendChallengeToPlayer(message.senderUID, message.senderName || "Player");
+                if (sent) {
+                    accept.textContent = "✓ Request sent";
+                } else {
+                    accept.disabled = false;
+                }
+            } catch (error) {
+                accept.disabled = false;
+                alert(error.message || "Could not accept the public challenge.");
+            }
+        });
+        meta.appendChild(accept);
+    }
+
+    stack.append(bubble, meta);
+    if (!mine) row.appendChild(avatar);
+    row.appendChild(stack);
+    if (mine) row.appendChild(avatar);
+    return row;
+}
+
+function renderPublicMessages(snapshot) {
+    const messages = [];
+    if (snapshot.exists()) snapshot.forEach((child) => messages.push({ ...(child.val() || {}), key: child.key }));
+    messages.sort((a, b) => Number(a.time || 0) - Number(b.time || 0));
+    const recent = messages.slice(-120);
+    els.publicChatMessages.innerHTML = "";
+    if (!recent.length) {
+        els.publicChatMessages.innerHTML = `<div class="chat-empty"><div><strong>Welcome to Public Chat</strong><p style="margin-top:6px;font-size:12px">Be respectful, meet other players, or post a public match challenge.</p></div></div>`;
+        return;
+    }
+    recent.forEach((message) => {
+        if (!message.senderUID) return;
+        els.publicChatMessages.appendChild(formatPublicMessage(message));
+    });
+    els.publicChatMessages.scrollTop = els.publicChatMessages.scrollHeight;
+}
+
+function loadPublicChat() {
+    if (!auth.currentUser) return;
+    stopPublicChatListener();
+    els.publicChatMessages.innerHTML = `<div class="empty-state">Connecting to global chat…</div>`;
+    publicChatUnsubscribe = onValue(ref(database, "publicMessages"), renderPublicMessages, (error) => {
+        els.publicChatMessages.innerHTML = `<div class="empty-state">Could not load public chat. Check Firebase Realtime Database rules for the publicMessages path. ${escapeHTML(error.message || "Access denied")}</div>`;
+    });
+}
+
+async function publishPublicMessage(type = "message") {
+    const me = auth.currentUser;
+    if (!me) return;
+    const text = els.publicChatInput.value.trim();
+    if (type === "message" && !text) return;
+    if (text.length > 1000) {
+        alert("Public messages can be up to 1000 characters.");
+        return;
+    }
+    const button = type === "challenge" ? els.publicChallengeBtn : els.publicSendBtn;
+    button.disabled = true;
+    try {
+        await push(ref(database, "publicMessages"), {
+            senderUID: me.uid,
+            senderName: currentUserData.username || me.displayName || "Player",
+            senderImage: currentUserData.image || me.photoURL || DEFAULT_AVATAR,
+            text: type === "message" ? text : "",
+            type,
+            time: Date.now()
+        });
+        if (type === "message") {
+            els.publicChatInput.value = "";
+            els.publicChatInput.style.height = "auto";
+            els.publicChatCharCount.textContent = "0 / 1000";
+        }
+    } catch (error) {
+        alert(error.message || "Could not send to public chat. Check Firebase Database access rules.");
+    } finally {
+        button.disabled = false;
+        els.publicChatInput.focus();
+    }
+}
+
+els.publicChatBtn?.addEventListener("click", () => {
+    openNavigationModal(els.publicChatModal);
+    loadPublicChat();
+    setTimeout(() => els.publicChatInput.focus(), 70);
+});
+els.closePublicChat?.addEventListener("click", () => {
+    stopPublicChatListener();
+    closeModal(els.publicChatModal);
+});
+els.publicSendBtn?.addEventListener("click", () => publishPublicMessage("message"));
+els.publicChallengeBtn?.addEventListener("click", () => publishPublicMessage("challenge"));
+els.publicChatInput?.addEventListener("input", () => {
+    els.publicChatCharCount.textContent = `${els.publicChatInput.value.length} / 1000`;
+    els.publicChatInput.style.height = "auto";
+    els.publicChatInput.style.height = `${Math.min(130, els.publicChatInput.scrollHeight)}px`;
+});
+els.publicChatInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey && prefs.enterToSend) {
+        event.preventDefault();
+        publishPublicMessage("message");
+    }
+});
+
 
 /* NOTIFICATIONS */
 function getReadNotifications() {
@@ -2095,7 +2606,9 @@ $$(".profile-modal").forEach((modal) => {
             updateTypingState(false);
             stopChatListeners();
         }
-        closeModal(modal);
+        if (modal === els.publicChatModal) stopPublicChatListener();
+        if (modal === els.pinLockModal) closePinLockModal();
+        else closeModal(modal);
     });
 });
 
@@ -2105,14 +2618,16 @@ els.closeViewUser.addEventListener("click", () => closeModal(els.viewUserModal))
 document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
 
-    const open = $$(".profile-modal, .game-popup").find((modal) => modal.style.display === "flex");
+    const open = $$(".profile-modal, .game-popup").reverse().find((modal) => modal.style.display === "flex");
     if (open) {
-        closeModal(open);
+        if (open === els.pinLockModal) closePinLockModal();
+        else closeModal(open);
         if (open === els.weaponPickerModal) closeWeaponPicker();
         if (open === els.chatModal) {
             stopChatListeners();
             updateTypingState(false);
         }
+        if (open === els.publicChatModal) stopPublicChatListener();
     }
 });
 
@@ -2191,6 +2706,9 @@ els.searchModal.setAttribute("aria-hidden", "true");
 els.viewUserModal.setAttribute("aria-hidden", "true");
 els.chatListModal.setAttribute("aria-hidden", "true");
 els.chatModal.setAttribute("aria-hidden", "true");
+els.publicChatModal?.setAttribute("aria-hidden", "true");
+els.pinLockModal?.setAttribute("aria-hidden", "true");
+els.installHelpModal?.setAttribute("aria-hidden", "true");
 els.notifModal.setAttribute("aria-hidden", "true");
 els.settingsModal.setAttribute("aria-hidden", "true");
 els.leaderboardModal.setAttribute("aria-hidden", "true");

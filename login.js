@@ -18,6 +18,15 @@ import {
 
 const $ = (id) => document.getElementById(id);
 
+// Register the PWA shell on the sign-in page so it is ready after entering the arena.
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+            console.warn("WHITE_RPS app installation support was unavailable:", error);
+        });
+    }, { once: true });
+}
+
 const signupModal = $("signupModal");
 const forgotModal = $("forgotModal");
 const rulesModal = $("rulesModal");
@@ -40,7 +49,7 @@ $("closeSignupBottom").addEventListener("click", () => closeModal(signupModal));
 $("closeForgot").addEventListener("click", () => closeModal(forgotModal));
 $("closeForgotBottom").addEventListener("click", () => closeModal(forgotModal));
 $("closeRules").addEventListener("click", () => closeModal(rulesModal));
-$("acceptRulesBtn").addEventListener("click", () => { $("agreeRules").checked = true; closeModal(rulesModal); });
+$("acceptRulesBtn").addEventListener("click", () => { const checkbox = $("agreeRules"); if (checkbox) checkbox.checked = true; closeModal(rulesModal); });
 $("openRules").addEventListener("click", () => openModal(rulesModal));
 
 document.querySelectorAll(".modal").forEach((modal) => {
@@ -69,9 +78,16 @@ function friendlyAuthError(error) {
         "auth/email-already-in-use": "That email is already registered.",
         "auth/weak-password": "Password must be at least 6 characters.",
         "auth/user-not-found": "No account was found for that email.",
-        "auth/too-many-requests": "Too many attempts. Please try again later."
+        "auth/too-many-requests": "Too many attempts. Please try again later.",
+        "auth/operation-not-allowed": "Google sign-in is disabled in Firebase. Enable Google under Authentication → Sign-in method.",
+        "auth/unauthorized-domain": "This website domain is not authorized in Firebase Authentication. Add it under Authentication → Settings → Authorized domains.",
+        "auth/popup-blocked": "Your browser blocked the Google sign-in popup. Allow popups for this site and try again.",
+        "auth/popup-closed-by-user": "The Google sign-in window was closed before finishing.",
+        "auth/cancelled-popup-request": "A Google sign-in window is already open. Finish that window first.",
+        "auth/account-exists-with-different-credential": "An account already exists with this email using a different sign-in method. Sign in with that method first.",
+        "auth/network-request-failed": "Network request failed. Check your connection and try again."
     };
-    return messages[error.code] || error.message || "Something went wrong.";
+    return messages[error?.code] || error?.message || "Something went wrong.";
 }
 
 loginForm.addEventListener("submit", async (event) => {
@@ -162,7 +178,7 @@ $("signupBtn").addEventListener("click", async () => {
         $("signupEmail").value = "";
         $("signupPassword").value = "";
         $("signupConfirmPassword").value = "";
-        $("agreeRules").checked = false;
+        if ($("agreeRules")) $("agreeRules").checked = false;
         updatePasswordStrength();
         alert("Account created successfully. Welcome to WHITE_RPS!");
     } catch (error) {
@@ -173,7 +189,8 @@ $("signupBtn").addEventListener("click", async () => {
 });
 
 async function handleGoogleAuth(mode) {
-    if (mode === "signup" && !$("agreeRules").checked) {
+    const rulesCheckbox = $("agreeRules");
+    if (mode === "signup" && (!rulesCheckbox || !rulesCheckbox.checked)) {
         alert("Please agree to the WHITE_RPS Fair Play Rules before signing up with Google.");
         return;
     }
@@ -204,7 +221,7 @@ async function handleGoogleAuth(mode) {
         await ensureGoogleProfile(result.user, isNewUser);
 
         if (mode === "signup") {
-            $("agreeRules").checked = false;
+            if (rulesCheckbox) rulesCheckbox.checked = false;
             closeModal(signupModal);
             alert("Google account created successfully. Welcome to WHITE_RPS!");
         }

@@ -121,8 +121,8 @@ html[data-theme="light"] .sidebar {
 .nav-btn {
     width: 100%; border: 1px solid transparent; background: transparent;
     min-height: 48px; padding: 0 13px; border-radius: 15px;
-    display: block; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px;text-align: start;
-    text-align: left; cursor: pointer; color: var(--muted);
+    display: block; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px;
+    text-align: start; cursor: pointer; color: var(--muted);
     transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
 }
 .nav-btn:hover { transform: translateX(3px); color: var(--text); background: var(--surface-3); border-color: var(--line); }
@@ -666,3 +666,101 @@ body.compact-mode .choice { min-height:120px; }
   .mobile-choices{grid-template-columns:1fr;gap:8px}.mobile-choice{min-height:74px;display:grid;grid-template-columns:54px 1fr;grid-template-rows:auto auto;align-items:center;text-align:left;padding:10px 13px}.mobile-choice .emoji{grid-row:1/span 2;margin:0;font-size:42px}.mobile-choice strong{margin:0}.mobile-choice small{margin:2px 0 0;text-align:left}.weapon-picker-panel{max-height:86vh;overflow:auto}.chat-compose-footer{gap:6px;flex-wrap:wrap}.chat-compose-actions{width:100%;justify-content:flex-end}.chat-compose-actions .send-btn{min-width:92px}.challenge-send-btn{min-width:102px}
 }
 @media(max-width:420px){.chat-compose-actions{gap:5px}.challenge-send-btn{padding-inline:9px;min-width:92px}.send-btn{padding-inline:11px}.mobile-weapon-trigger{left:10px;right:10px;bottom:10px}}
+
+
+/* Conversation actions and public global chat */
+#publicChatBtn > span:first-child{font-size:17px}
+.chat-item{position:relative;padding-right:42px;cursor:pointer}
+.chat-item.conversation-pinned{border-color:rgba(255,213,106,.2)}
+.chat-item.conversation-unread .chat-item-copy strong{color:var(--text)}
+.chat-item.conversation-unread .chat-item-copy p{color:var(--text);font-weight:650}
+.chat-pin-icon,.chat-lock-icon{font-size:10px}
+.conversation-more-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:31px;height:34px;display:grid;place-items:center;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--muted);font-size:22px;line-height:1;cursor:pointer}
+.conversation-more-btn:hover,.conversation-more-btn:focus-visible{color:var(--text);border-color:var(--line-strong);background:var(--surface-3)}
+.conversation-menu{position:fixed;z-index:5000;min-width:210px;padding:6px;border:1px solid var(--line-strong);border-radius:14px;background:var(--surface-2);box-shadow:0 18px 55px rgba(0,0,0,.42);backdrop-filter:blur(18px);display:grid;gap:3px}
+.conversation-menu.hidden{display:none!important}
+.conversation-menu button{min-height:39px;padding:0 11px;border:0;border-radius:9px;background:transparent;color:var(--text);text-align:left;font-size:11px;font-weight:750;cursor:pointer}
+.conversation-menu button:hover{background:var(--surface-3)}
+.conversation-menu .conversation-delete{color:#ff929b}
+.public-chat-panel{width:min(820px,100%)}
+.public-chat-header{cursor:default}
+.public-chat-globe{width:43px;height:43px;display:grid;place-items:center;border:1px solid rgba(89,217,246,.18);border-radius:14px;background:rgba(89,217,246,.08);font-size:20px;flex:none}
+.public-live-pill{display:flex;align-items:center;gap:6px;margin-left:auto;padding:6px 9px;border:1px solid rgba(119,242,168,.16);border-radius:999px;color:var(--accent);font-size:9px;font-weight:900;letter-spacing:.08em}
+.public-live-pill i{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(119,242,168,.08)}
+.public-chat-messages{gap:13px;background:radial-gradient(circle at 50% 0%,rgba(89,217,246,.04),transparent 38%)}
+.public-message-row{display:flex;align-items:flex-end;gap:8px;max-width:92%;align-self:flex-start}
+.public-message-mine{align-self:flex-end}
+.public-message-avatar{width:29px;height:29px;object-fit:cover;border-radius:9px;border:1px solid var(--line);flex:none}
+.public-message-stack{min-width:0;display:grid;gap:4px;max-width:100%}
+.public-message-bubble{padding:10px 12px;border:1px solid var(--line);border-radius:14px 14px 14px 5px;background:var(--surface-3);overflow-wrap:anywhere}
+.public-message-my-bubble{border-color:rgba(119,242,168,.17);background:rgba(119,242,168,.075);border-radius:14px 14px 5px 14px}
+.public-message-name{display:block;margin-bottom:4px;color:var(--accent-2);font-size:10px;font-weight:900}
+.public-message-bubble p{font-size:12px;line-height:1.5;white-space:pre-wrap}
+.public-message-meta{display:flex;justify-content:flex-start;align-items:center;gap:7px;padding:0 3px;color:var(--muted-2);font-size:9px}
+.public-message-mine .public-message-meta{justify-content:flex-end}
+.public-challenge-bubble{border-color:rgba(89,217,246,.25);background:linear-gradient(145deg,rgba(89,217,246,.09),rgba(119,242,168,.045))}
+.public-challenge-bubble small{display:block;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.5}
+.public-accept-challenge{min-height:26px;padding:0 9px;border:1px solid rgba(119,242,168,.25);border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:9px;font-weight:900;cursor:pointer}
+.public-accept-challenge:disabled{opacity:.65;cursor:default}
+.public-compose-footer small{position:static}
+@media(max-width:680px){
+  .conversation-menu{min-width:200px}
+  .public-chat-header{padding-right:12px;gap:8px}
+  .public-chat-globe{width:36px;height:36px}
+  .public-live-pill{font-size:8px;padding:5px 7px}
+  .public-message-row{max-width:98%}
+  .public-chat-panel{height:92vh;max-height:92vh}
+  .public-compose-footer .chat-compose-actions{width:100%;justify-content:space-between}
+  .public-compose-footer .challenge-send-btn{flex:1}
+}
+
+
+/* PWA install entry and guided install card */
+.install-app-nav { border-color: rgba(119,242,168,.18); background: linear-gradient(110deg, rgba(119,242,168,.12), rgba(89,217,246,.05)); color: var(--text); }
+.install-app-nav:hover { border-color: rgba(119,242,168,.38); background: linear-gradient(110deg, rgba(119,242,168,.18), rgba(89,217,246,.09)); }
+.install-nav-mark { color: var(--accent); font-weight: 900; }
+.install-help-panel { width: min(100%, 510px); padding: 32px; }
+.install-app-emblem, .pin-lock-emblem { width: 62px; height: 62px; display: grid; place-items: center; border-radius: 20px; margin-bottom: 18px; font-size: 27px; border: 1px solid var(--line-strong); background: linear-gradient(135deg, var(--accent-soft), rgba(89,217,246,.10)); box-shadow: 0 16px 34px rgba(0,0,0,.16); }
+.install-help-panel h2, .pin-lock-panel h2 { margin-top: 7px; font-size: clamp(24px, 4vw, 30px); letter-spacing: -.04em; }
+.install-help-description, .pin-lock-description { margin-top: 8px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.install-steps-card { display: grid; gap: 10px; margin: 21px 0 15px; }
+.install-step { display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 11px; padding: 13px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface-3); }
+.install-step > span { height: 36px; display: grid; place-items: center; border-radius: 11px; color: var(--accent); background: var(--accent-soft); font-weight: 900; font-size: 11px; }
+.install-step p { color: var(--text); font-size: 12px; line-height: 1.5; }
+.install-help-note { border-left: 3px solid var(--accent-2); padding: 10px 12px; border-radius: 0 10px 10px 0; background: rgba(89,217,246,.06); color: var(--muted); font-size: 11px; line-height: 1.6; }
+.install-help-try { width: 100%; margin-top: 15px; }
+
+/* Custom, in-app conversation PIN lock. No native prompt/alert dialogs. */
+.pin-lock-panel { width: min(100%, 480px); padding: 30px; }
+.pin-lock-emblem { color: var(--accent); }
+.pin-lock-user-chip { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 20px 0; border-radius: 15px; border: 1px solid var(--line); background: var(--surface-3); }
+.pin-lock-user-chip > span { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: var(--accent-soft); font-size: 18px; }
+.pin-lock-user-chip small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .14em; font-weight: 800; }
+.pin-lock-user-chip strong { display: block; max-width: 290px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.pin-lock-panel form { display: grid; gap: 13px; }
+.pin-field { display: grid; gap: 7px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.pin-field input { width: 100%; min-height: 50px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 13px; background: var(--surface-3); color: var(--text); outline: none; letter-spacing: .20em; font-size: 17px; transition: border-color .18s ease, box-shadow .18s ease; }
+.pin-field input:focus { border-color: var(--accent-2); box-shadow: 0 0 0 3px rgba(89,217,246,.10); }
+.pin-field input::placeholder { letter-spacing: .02em; font-size: 12px; color: var(--muted-2); }
+.pin-lock-feedback { min-height: 18px; color: var(--danger); font-size: 11px; line-height: 1.5; }
+.pin-lock-feedback.success { color: var(--accent); }
+.pin-lock-actions { display: grid; grid-template-columns: 1fr 1.3fr; gap: 9px; }
+.pin-lock-actions button { width: 100%; }
+.pin-lock-footnote { margin-top: 19px; padding-top: 14px; display: flex; align-items: flex-start; gap: 8px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.65; }
+.pin-lock-footnote span { color: var(--accent-2); font-size: 14px; }
+.app-toast-container { position: fixed; right: 20px; bottom: 20px; z-index: 3000; width: min(360px, calc(100vw - 32px)); display: grid; gap: 9px; pointer-events: none; }
+.app-toast { display: flex; align-items: flex-start; gap: 10px; padding: 14px 15px; border: 1px solid var(--line-strong); border-radius: 16px; color: var(--text); background: var(--surface-2); box-shadow: var(--shadow); font-size: 12px; line-height: 1.5; animation: toastIn .2s ease both; }
+.app-toast:before { content: "✓"; flex: none; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 900; }
+.app-toast.error:before { content: "!"; background: rgba(255,107,120,.12); color: var(--danger); }
+.app-toast.info:before { content: "i"; background: rgba(89,217,246,.12); color: var(--accent-2); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) {
+    .install-help-panel, .pin-lock-panel { padding: 25px 18px 18px; border-radius: 23px; }
+    .install-app-emblem, .pin-lock-emblem { width: 54px; height: 54px; border-radius: 17px; margin-bottom: 14px; }
+    .pin-lock-actions { grid-template-columns: 1fr; }
+    .app-toast-container { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+
+/* Keep the expanded sidebar usable on shorter laptop and phone screens. */
+.sidebar > div:first-child { min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+.sidebar-bottom { flex: none; }

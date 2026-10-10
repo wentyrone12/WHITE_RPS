@@ -35,3 +35,34 @@ Firebase Realtime Database security rules still control what can be read/written
 ### Firebase console requirement
 
 Enable **Google** under Firebase Authentication > Sign-in method/providers for the Google buttons to work. The code uses Firebase's current Google provider popup flow.
+
+
+### Follow-up fixes and social features (October 2026)
+
+- Fixed the Create Account rules checkbox ID mismatch that caused `Cannot read properties of null (reading 'checked')`.
+- Added clearer Google authentication errors. In Firebase Console, Google must be enabled under Authentication → Sign-in method, and the website hostname must be listed under Authentication → Settings → Authorized domains.
+- Added three-dot conversation actions: delete from your own list, pin/unpin, mark unread/read, and a device-local PIN lock. Deleting a conversation removes only your `chatList` entry; it does not erase the other person's copy or shared message history.
+- The conversation lock is a local browser privacy feature, not message encryption or a server-enforced security boundary. Lock settings are specific to the current browser/device.
+- Added realtime Public Chat backed by Realtime Database path `publicMessages`. Public challenge posts are visible to everyone; another user can press Accept challenge to send a normal direct match request to the challenge author.
+- Firebase Realtime Database rules must permit authenticated users to read and write `publicMessages`, and read/write their permitted conversation entries. If the public chat reports permission denied, review the rules in Firebase Console; client code cannot override database rules.
+
+
+Example Realtime Database rule branch for Public Chat (merge this into your existing `.rules`; do not replace unrelated rules):
+
+```json
+"publicMessages": {
+  ".read": "auth != null",
+  "$messageId": {
+    ".write": "auth != null && ((!data.exists() && newData.child('senderUID').val() === auth.uid) || (data.exists() && data.child('senderUID').val() === auth.uid))"
+  }
+}
+```
+
+This allows signed-in users to read public posts and only create/update/delete posts where the `senderUID` matches their own authenticated UID. Review this alongside your existing rules before publishing.
+
+
+### Installable app + custom conversation PIN cards
+
+- Added an **Install App** entry in the dashboard sidebar, a web app manifest, branded 192/512 app icons, and a separate early-loading `pwa.js` install module plus service worker that caches the app shell for faster startup and offline page-shell access. Firebase authentication, public chat, and realtime messaging still require an internet connection.
+- For installation, deploy the folder to an HTTPS website (or run it from `localhost` for development). Opening `index.html` directly using `file://` does not support PWA installation/service workers. On iPhone/iPad, use Safari's Share menu → Add to Home Screen.
+- The conversation lock now uses a dedicated in-app PIN card for creating, confirming, entering, or removing a PIN. Incorrect PIN feedback is shown in the card; this PIN workflow does not use native JavaScript `prompt()` or `alert()` dialogs. New PIN hashes use salted PBKDF2-SHA-256 (120,000 iterations) and are stored in browser-local storage per signed-in user/device, so this is a local privacy lock rather than server-enforced encryption. Clearing browser storage or switching browsers/devices does not transfer the lock settings.
