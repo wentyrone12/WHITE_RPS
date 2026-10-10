@@ -218,6 +218,20 @@ const els = {
     gameRequest: $("gameRequest"),
     enterToSend: $("enterToSend"),
     savePrivacyBtn: $("savePrivacyBtn"),
+    deviceInfoStatus: $("deviceInfoStatus"),
+    deviceIp: $("deviceIp"),
+    deviceLocation: $("deviceLocation"),
+    deviceLocationDetail: $("deviceLocationDetail"),
+    deviceTimezone: $("deviceTimezone"),
+    deviceCoordinates: $("deviceCoordinates"),
+    deviceWeatherIcon: $("deviceWeatherIcon"),
+    deviceWeatherTemp: $("deviceWeatherTemp"),
+    deviceWeatherDescription: $("deviceWeatherDescription"),
+    deviceWeatherDetails: $("deviceWeatherDetails"),
+    deviceWeatherUpdated: $("deviceWeatherUpdated"),
+    refreshDeviceInfoBtn: $("refreshDeviceInfoBtn"),
+    usePreciseLocationBtn: $("usePreciseLocationBtn"),
+    useIpLocationBtn: $("useIpLocationBtn"),
     deleteAccountBtn: $("deleteAccountBtn"),
 
     leaderboardModal: $("leaderboardModal"),
@@ -412,7 +426,7 @@ function openNavigationModal(modal) {
 
 function playClick() {
     if (!prefs.soundEnabled) return;
-    sounds.click.currentTime = 2;
+    sounds.click.currentTime = 2.1;
     sounds.click.play().catch(() => {});
 }
 
@@ -548,6 +562,239 @@ function syncSettingsUI(data = currentUserData) {
     if (els.onlineStatus) els.onlineStatus.checked = data.showOnlineStatus !== false;
     if (els.gameRequest) els.gameRequest.checked = data.allowGameRequests !== false;
     applyPreferences();
+}
+
+/* REAL-TIME LOCAL CLOCK */
+function updateWorldClock() {
+    const timeNode = $("worldClockTime");
+    const dateNode = $("worldClockDate");
+    const zoneNode = $("worldClockZone");
+    if (!timeNode || !dateNode || !zoneNode) return;
+    const now = new Date();
+    timeNode.textContent = new Intl.DateTimeFormat(undefined, {
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
+    }).format(now);
+    dateNode.textContent = new Intl.DateTimeFormat(undefined, {
+        weekday: "short", month: "short", day: "numeric", year: "numeric"
+    }).format(now);
+    zoneNode.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || "Device local time";
+}
+updateWorldClock();
+window.setInterval(updateWorldClock, 1000);
+
+/* DEVICE, IP LOCATION AND WEATHER */
+let ipGeoCache = null;
+let preciseDeviceCoords = null;
+let deviceInfoLoading = false;
+
+function setDeviceInfoStatus(message, state = "info") {
+    if (!els.deviceInfoStatus) return;
+    els.deviceInfoStatus.textContent = message;
+    els.deviceInfoStatus.dataset.state = state;
+}
+
+async function fetchJsonWithTimeout(url, timeoutMs = 9000) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            cache: "no-store",
+            headers: { Accept: "application/json" },
+            signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`Service returned HTTP ${response.status}`);
+        return await response.json();
+    } finally {
+        window.clearTimeout(timeoutId);
+    }
+}
+
+async function lookupPublicIpLocation() {
+    const providers = [
+        async () => {
+            const data = await fetchJsonWithTimeout("https://ipapi.co/json/");
+            if (data.error || !data.ip || !Number.isFinite(Number(data.latitude)) || !Number.isFinite(Number(data.longitude))) {
+                throw new Error(data.reason || "IP location data unavailable");
+            }
+            return {
+                ip: data.ip,
+                city: data.city,
+                region: data.region,
+                country: data.country_name || data.country,
+                latitude: Number(data.latitude),
+                longitude: Number(data.longitude)
+            };
+        },
+        async () => {
+            const data = await fetchJsonWithTimeout("https://ipwho.is/");
+            if (data.success === false || !data.ip || !Number.isFinite(Number(data.latitude)) || !Number.isFinite(Number(data.longitude))) {
+                throw new Error(data.message || "IP location data unavailable");
+            }
+            return {
+                ip: data.ip,
+                city: data.city,
+                region: data.region,
+                country: data.country,
+                latitude: Number(data.latitude),
+                longitude: Number(data.longitude)
+            };
+        }
+    ];
+    let lastError;
+    for (const provider of providers) {
+        try { return await provider(); }
+        catch (error) { lastError = error; }
+    }
+    throw lastError || new Error("Could not look up your public IP address.");
+}
+
+function getWeatherDescription(code, isDay) {
+    const map = {
+        0: [isDay ? "☀️" : "🌙", isDay ? "Clear sky" : "Clear night"],
+        1: [isDay ? "🌤️" : "🌙", "Mainly clear"],
+        2: ["⛅", "Partly cloudy"],
+        3: ["☁️", "Overcast"],
+        45: ["🌫️", "Fog"], 48: ["🌫️", "Depositing rime fog"],
+        51: ["🌦️", "Light drizzle"], 53: ["🌦️", "Moderate drizzle"], 55: ["🌧️", "Dense drizzle"],
+        56: ["🌧️", "Light freezing drizzle"], 57: ["🌧️", "Dense freezing drizzle"],
+        61: ["🌦️", "Slight rain"], 63: ["🌧️", "Moderate rain"], 65: ["🌧️", "Heavy rain"],
+        66: ["🌧️", "Light freezing rain"], 67: ["🌧️", "Heavy freezing rain"],
+        71: ["🌨️", "Slight snow"], 73: ["🌨️", "Moderate snow"], 75: ["❄️", "Heavy snow"], 77: ["🌨️", "Snow grains"],
+        80: ["🌦️", "Slight rain showers"], 81: ["🌧️", "Moderate rain showers"], 82: ["⛈️", "Violent rain showers"],
+        85: ["🌨️", "Slight snow showers"], 86: ["❄️", "Heavy snow showers"],
+        95: ["⛈️", "Thunderstorm"], 96: ["⛈️", "Thunderstorm with slight hail"], 99: ["⛈️", "Thunderstorm with heavy hail"]
+    };
+    return map[Number(code)] || ["🌡️", "Weather condition unavailable"];
+}
+
+async function loadWeatherAtCoordinates(latitude, longitude) {
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("Location coordinates are unavailable.");
+    const params = new URLSearchParams({
+        latitude: String(latitude),
+        longitude: String(longitude),
+        current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m",
+        timezone: "auto",
+        temperature_unit: "celsius",
+        wind_speed_unit: "kmh"
+    });
+    const data = await fetchJsonWithTimeout(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+    const current = data.current;
+    if (!current || !Number.isFinite(Number(current.temperature_2m))) throw new Error("Current weather data is unavailable.");
+    const [icon, description] = getWeatherDescription(current.weather_code, Number(current.is_day) === 1);
+    els.deviceWeatherIcon.textContent = icon;
+    els.deviceWeatherTemp.textContent = `${Math.round(Number(current.temperature_2m))}°C`;
+    els.deviceWeatherDescription.textContent = description;
+    const feelsLike = Number.isFinite(Number(current.apparent_temperature)) ? `${Math.round(Number(current.apparent_temperature))}°C` : "—";
+    const humidity = Number.isFinite(Number(current.relative_humidity_2m)) ? `${Math.round(Number(current.relative_humidity_2m))}%` : "—";
+    const wind = Number.isFinite(Number(current.wind_speed_10m)) ? `${Math.round(Number(current.wind_speed_10m))} km/h` : "—";
+    els.deviceWeatherDetails.replaceChildren();
+    [ `Feels like ${feelsLike}`, `Humidity ${humidity}`, `Wind ${wind}` ].forEach((label) => {
+        const chip = document.createElement("span");
+        chip.textContent = label;
+        els.deviceWeatherDetails.appendChild(chip);
+    });
+    els.deviceWeatherUpdated.textContent = `Current model time: ${String(current.time || "latest available").replace("T", " ")} · ${data.timezone_abbreviation || data.timezone || "local time"}`;
+}
+
+async function loadDeviceInfo({ refresh = false } = {}) {
+    if (deviceInfoLoading) return;
+    deviceInfoLoading = true;
+    if (els.refreshDeviceInfoBtn) els.refreshDeviceInfoBtn.disabled = true;
+    setDeviceInfoStatus("Checking public IP and loading local conditions…");
+    if (els.deviceTimezone) els.deviceTimezone.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || "Device local time";
+
+    let ipError = false;
+    let weatherError = false;
+    try {
+        if (refresh || !ipGeoCache) {
+            if (refresh) ipGeoCache = null;
+            try {
+                ipGeoCache = await lookupPublicIpLocation();
+            } catch (error) {
+                ipError = true;
+                console.warn("WHITE_RPS IP location lookup failed:", error);
+            }
+        }
+
+        if (els.deviceIp) els.deviceIp.textContent = ipGeoCache?.ip || "Unavailable";
+        const locationParts = [ipGeoCache?.city, ipGeoCache?.region, ipGeoCache?.country].filter(Boolean);
+        if (els.deviceLocation) els.deviceLocation.textContent = locationParts.join(", ") || "Unavailable";
+        if (els.deviceLocationDetail) {
+            els.deviceLocationDetail.textContent = preciseDeviceCoords
+                ? "Area estimate from IP; precise coordinates are currently used for weather."
+                : "Approximate area inferred from public IP, not exact GPS.";
+        }
+
+        const coordinates = preciseDeviceCoords || (ipGeoCache ? { latitude: ipGeoCache.latitude, longitude: ipGeoCache.longitude } : null);
+        if (els.deviceCoordinates) {
+            els.deviceCoordinates.textContent = coordinates
+                ? `${coordinates.latitude.toFixed(3)}, ${coordinates.longitude.toFixed(3)} · ${preciseDeviceCoords ? "precise browser location" : "approximate IP location"}`
+                : "Unavailable — refresh or allow precise location";
+        }
+        if (coordinates) {
+            try {
+                await loadWeatherAtCoordinates(coordinates.latitude, coordinates.longitude);
+            } catch (error) {
+                weatherError = true;
+                console.warn("WHITE_RPS weather lookup failed:", error);
+                els.deviceWeatherTemp.textContent = "—°C";
+                els.deviceWeatherDescription.textContent = "Weather is temporarily unavailable. Check your connection and refresh.";
+                els.deviceWeatherIcon.textContent = "🌡️";
+                els.deviceWeatherDetails.replaceChildren();
+                els.deviceWeatherUpdated.textContent = "Could not load current weather.";
+            }
+        } else {
+            weatherError = true;
+            els.deviceWeatherDescription.textContent = "A location is needed to fetch local weather. Try refresh or allow precise location.";
+            els.deviceWeatherTemp.textContent = "—°C";
+            els.deviceWeatherIcon.textContent = "🌡️";
+            els.deviceWeatherDetails.replaceChildren();
+            els.deviceWeatherUpdated.textContent = "Weather has not been loaded.";
+        }
+
+        if (ipError && weatherError) setDeviceInfoStatus("Could not access the IP lookup or weather service. Check internet access and try again.", "error");
+        else if (ipError) setDeviceInfoStatus("IP lookup was unavailable. Weather may still use an approved precise location.", "error");
+        else if (weatherError) setDeviceInfoStatus("IP/location details loaded; current weather is unavailable right now.", "error");
+        else setDeviceInfoStatus("Updated successfully. Your IP and coordinates are not saved to your WHITE_RPS account.", "success");
+    } finally {
+        deviceInfoLoading = false;
+        if (els.refreshDeviceInfoBtn) els.refreshDeviceInfoBtn.disabled = false;
+    }
+}
+
+function requestPreciseDeviceLocation() {
+    if (!navigator.geolocation) {
+        setDeviceInfoStatus("This browser does not support precise location. You can use the IP-based estimate instead.", "error");
+        return;
+    }
+    if (els.usePreciseLocationBtn) {
+        els.usePreciseLocationBtn.disabled = true;
+        els.usePreciseLocationBtn.textContent = "Requesting permission…";
+    }
+    setDeviceInfoStatus("Your browser may ask permission to use this device's location.");
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        preciseDeviceCoords = {
+            latitude: Number(position.coords.latitude),
+            longitude: Number(position.coords.longitude)
+        };
+        if (els.usePreciseLocationBtn) {
+            els.usePreciseLocationBtn.disabled = false;
+            els.usePreciseLocationBtn.textContent = "Use precise location";
+        }
+        await loadDeviceInfo();
+    }, (error) => {
+        if (els.usePreciseLocationBtn) {
+            els.usePreciseLocationBtn.disabled = false;
+            els.usePreciseLocationBtn.textContent = "Use precise location";
+        }
+        const message = error.code === 1
+            ? "Location permission was denied. You can continue using the approximate IP-based location."
+            : error.code === 2
+                ? "Your device could not determine its location. Try again or use IP-based location."
+                : "Location request timed out. Try again or use IP-based location.";
+        setDeviceInfoStatus(message, "error");
+    }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
 }
 
 /* NAVIGATION */
@@ -2350,12 +2597,22 @@ $$(".settings-tab").forEach((tab) => {
         tab.classList.add("active");
         const target = $(tab.dataset.tab);
         if (target) target.classList.add("active");
+        if (tab.dataset.tab === "device") loadDeviceInfo();
     });
+});
+
+els.refreshDeviceInfoBtn?.addEventListener("click", () => loadDeviceInfo({ refresh: true }));
+els.usePreciseLocationBtn?.addEventListener("click", requestPreciseDeviceLocation);
+els.useIpLocationBtn?.addEventListener("click", async () => {
+    preciseDeviceCoords = null;
+    setDeviceInfoStatus("Switched back to the approximate IP-based location.");
+    await loadDeviceInfo();
 });
 
 els.settingsBtn.addEventListener("click", () => {
     openNavigationModal(els.settingsModal);
     syncSettingsUI();
+    if ($("device")?.classList.contains("active")) loadDeviceInfo();
 });
 
 els.closeSettings.addEventListener("click", () => closeModal(els.settingsModal));

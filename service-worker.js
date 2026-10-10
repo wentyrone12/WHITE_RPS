@@ -1,5 +1,5 @@
 /* WHITE_RPS PWA shell cache. Live chat and authentication still require a network connection. */
-const CACHE_NAME = "white-rps-shell-v4";
+const CACHE_NAME = "white-rps-shell-v5";
 const APP_SHELL = [
   "./",
   "./index.html",

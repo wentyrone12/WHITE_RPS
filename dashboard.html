@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -14,107 +13,7 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        @media (max-width: 820px) {
-            .clock-card {
-                position: relative;
-                top: -100px;
-                right: -300px;
-                width: 70%;
-                padding: 10px;
-                text-align: center;
-                background: rgba(15, 25, 20, 0.9);
-                border: 1px solid rgba(0, 255, 153, 0.3);
-                border-radius: 20px;
-                box-shadow: 0 0 45px rgba(0, 255, 153, 0.08);
-            }
-
-            .time {
-                font-size: 12px;
-                font-weight: 700;
-                letter-spacing: 2px;
-                color: #00ff99;
-                text-shadow: 0 0 20px rgba(0, 255, 153, 0.35);
-                font-variant-numeric: tabular-nums;
-            }
-
-            .date {
-                font-size: 07px;
-                color: #b8c9bf;
-            }
-
-            .timezone {
-                margin-top: 0;
-                color: #00ff99;
-                font-size: 12px;
-                letter-spacing: 2px;
-                margin-left: 5px;
-                font-weight: bold;
-            }
-
-            .dots {
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                background: var(--accent);
-                box-shadow: 0 0 0 4px rgba(119, 242, 168, .08);
-                margin: 3px;
-            }
-
-            .timedot {
-                margin: 5px;
-                position: absolute;
-                top: 120px;
-                border-radius: 100px;
-                width: 30%;
-                border: 1px solid green;
-                padding: 4px;
-                display: flex;
-            }
-        }
-
-        @media (min-width: 1024px) {
-
-            .clock-card {
-                width: 80%;
-                padding: 10px;
-                text-align: center;
-                background: rgba(15, 25, 20, 0.9);
-                border: 1px solid rgba(0, 255, 153, 0.3);
-                border-radius: 20px;
-                box-shadow: 0 0 45px rgba(0, 255, 153, 0.08);
-                display: flex;
-            }
-
-            .time {
-                font-size: 18px;
-                font-weight: 700;
-                letter-spacing: 2px;
-                color: #00ff99;
-                text-shadow: 0 0 20px rgba(0, 255, 153, 0.35);
-                font-variant-numeric: tabular-nums;
-            }
-
-            .date {
-                font-size: 10px;
-                color: #b8c9bf;
-                margin: 5px;
-            }
-            .timezone {
-                content: "";
-                position: relative;
-                justify-self: center;
-                bottom: -50px;
-                font-size: 20px;
-                font-weight: bold;
-                color: var(--accent);
-                left: 300px;
-            }
-        }
-    </style>
 </head>
-
 <body>
 
     <div class="app-bg" aria-hidden="true">
@@ -148,12 +47,10 @@
                 <button class="nav-btn active-nav" id="profileBtn"><span></span><span>Profile</span></button>
                 <button class="nav-btn" id="searchBtn"><span></span><span>Find Players</span></button>
                 <button class="nav-btn" id="leaderboardBtn"><span></span><span>Leaderboards</span></button>
-                <button class="nav-btn" id="chatBtn"><span></span><span>Messages</span><span class="nav-badge hidden"
-                        id="chatBadge">0</span></button>
+                <button class="nav-btn" id="chatBtn"><span></span><span>Messages</span><span class="nav-badge hidden" id="chatBadge">0</span></button>
                 <button class="nav-btn" id="publicChatBtn"><span></span><span>Public Chat</span></button>
                 <button class="nav-btn" id="settingsBtn"><span></span><span>Settings</span></button>
-                <button class="nav-btn install-app-nav" id="installAppBtn" type="button"><span></span><span
-                        id="installAppLabel">Install App</span><span class="install-nav-mark">↗</span></button>
+                <button class="nav-btn install-app-nav" id="installAppBtn" type="button"><span>📲</span><span id="installAppLabel">Install App</span><span class="install-nav-mark">↗</span></button>
             </nav>
         </div>
 
@@ -171,20 +68,17 @@
 
     <main class="main-shell">
         <header class="topbar">
-            <div>
+            <div class="topbar-heading">
                 <p class="eyebrow">RPS ARENA</p>
                 <h1>Ready for your next round?</h1>
-
-                <main class="clock-card">
-
-                    <div class="time" id="time">00:00:00 AM</div>
-
-                    <div class="date" id="date">Loading date...</div>
-
-                </main>
-                <div class="timedot"><span class="dots"></span>
-                    <div class="timezone" id="timezone">TIME ZONE</div>
+            </div>
+            <div class="world-clock" aria-label="Current local date and time">
+                <div class="world-clock-icon" aria-hidden="true">◷</div>
+                <div class="world-clock-copy">
+                    <time id="worldClockTime" class="world-clock-time">--:--:--</time>
+                    <span id="worldClockDate" class="world-clock-date">Loading date…</span>
                 </div>
+                <span id="worldClockZone" class="world-clock-zone">Local time</span>
             </div>
             <div class="topbar-actions">
                 <button class="icon-btn notif-trigger" id="notifBtn" aria-label="Notifications">
@@ -221,8 +115,7 @@
                 <section class="player-side player-card-3d">
                     <div class="player-header">
                         <div class="player-identity">
-                            <img id="battlePlayerAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                                alt="">
+                            <img id="battlePlayerAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
                             <div>
                                 <span class="player-label">PLAYER</span>
                                 <h2>YOU</h2>
@@ -346,8 +239,7 @@
             <div class="profile-cover"></div>
             <div class="profile-main">
                 <div class="profile-avatar-wrap">
-                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="profileImage"
-                        class="profile-image" alt="Profile picture">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="profileImage" class="profile-image" alt="Profile picture">
                     <span class="presence-ring" id="profilePresence"></span>
                 </div>
                 <div class="profile-heading">
@@ -375,15 +267,9 @@
             <div class="edit-section" id="editSection">
                 <div class="form-grid">
                     <label>Profile picture<input type="file" id="profileUpload" accept="image/*"></label>
-                    <label>Bio<input type="text" id="editBio" placeholder="Tell players about you"
-                            maxlength="120"></label>
+                    <label>Bio<input type="text" id="editBio" placeholder="Tell players about you" maxlength="120"></label>
                     <label>Age<input type="number" id="editAge" placeholder="Optional" min="1" max="120"></label>
-                    <label>Gender<select id="editGender">
-                            <option value="">Prefer not to say</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select></label>
+                    <label>Gender<select id="editGender"><option value="">Prefer not to say</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></label>
                 </div>
                 <div class="edit-actions">
                     <button id="cancelEditProfileBtn" class="secondary-btn">Cancel</button>
@@ -418,8 +304,7 @@
             <button class="modal-x" id="closeViewUser" aria-label="Close player profile">×</button>
             <div class="view-user-hero">
                 <div class="profile-avatar-wrap">
-                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-image"
-                        id="viewUserImage" alt="">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-image" id="viewUserImage" alt="">
                     <span class="presence-ring" id="viewUserPresence"></span>
                 </div>
                 <span class="section-kicker">PLAYER CARD</span>
@@ -464,8 +349,7 @@
         <div class="profile-card chat-panel">
             <div id="chatProfileHeader" class="chat-profile-header">
                 <button class="back-chat" id="closeChat" aria-label="Back to messages">←</button>
-                <img id="chatUserImage" class="chat-header-avatar"
-                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                <img id="chatUserImage" class="chat-header-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
                 <div>
                     <span class="section-kicker">CONVERSATION</span>
                     <h2 id="chatUserName">Username</h2>
@@ -484,8 +368,7 @@
                     <small id="chatCharCount">0 / 1000</small>
                     <div class="chat-compose-actions">
                         <button id="clearChatInputBtn" class="ghost-icon" title="Clear">×</button>
-                        <button id="chatChallengeBtn" class="challenge-send-btn" title="Challenge this player">⚔
-                            Challenge</button>
+                        <button id="chatChallengeBtn" class="challenge-send-btn" title="Challenge this player">⚔ Challenge</button>
                         <button id="sendMessageBtn" class="send-btn">Send ↗</button>
                     </div>
                 </div>
@@ -511,13 +394,11 @@
                 <div class="empty-state">Loading public messages…</div>
             </div>
             <div class="chat-input-box">
-                <textarea id="publicChatInput" placeholder="Say hello to the arena…" rows="1"
-                    maxlength="1000"></textarea>
+                <textarea id="publicChatInput" placeholder="Say hello to the arena…" rows="1" maxlength="1000"></textarea>
                 <div class="chat-compose-footer public-compose-footer">
                     <small id="publicChatCharCount">0 / 1000</small>
                     <div class="chat-compose-actions">
-                        <button id="publicChallengeBtn" class="challenge-send-btn"
-                            title="Post a public match challenge">⚔ Challenge Public</button>
+                        <button id="publicChallengeBtn" class="challenge-send-btn" title="Post a public match challenge">⚔ Challenge Public</button>
                         <button id="publicSendBtn" class="send-btn">Send ↗</button>
                     </div>
                 </div>
@@ -526,57 +407,40 @@
     </div>
 
     <!-- PWA INSTALL HELP CARD -->
-    <div class="profile-modal install-help-modal" id="installHelpModal" role="dialog" aria-modal="true"
-        aria-hidden="true" aria-labelledby="installHelpTitle">
+    <div class="profile-modal install-help-modal" id="installHelpModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="installHelpTitle">
         <div class="profile-card modal-panel install-help-panel">
             <button class="modal-x" id="closeInstallHelp" aria-label="Close install guide">×</button>
             <div class="install-app-emblem">📲</div>
             <span class="section-kicker">YOUR ARENA, ONE TAP AWAY</span>
             <h2 id="installHelpTitle">Install WHITE_RPS</h2>
-            <p id="installHelpDescription" class="install-help-description">Add the arena to your device for a
-                convenient app-like experience.</p>
+            <p id="installHelpDescription" class="install-help-description">Add the arena to your device for a convenient app-like experience.</p>
             <div class="install-steps-card">
-                <div class="install-step"><span>01</span>
-                    <p id="installStepOne">Open this website in a supported browser.</p>
-                </div>
-                <div class="install-step"><span>02</span>
-                    <p id="installStepTwo">Open your browser menu or use its install icon.</p>
-                </div>
-                <div class="install-step"><span>03</span>
-                    <p id="installStepThree">Choose Install app or Add to Home Screen.</p>
-                </div>
+                <div class="install-step"><span>01</span><p id="installStepOne">Open this website in a supported browser.</p></div>
+                <div class="install-step"><span>02</span><p id="installStepTwo">Open your browser menu or use its install icon.</p></div>
+                <div class="install-step"><span>03</span><p id="installStepThree">Choose Install app or Add to Home Screen.</p></div>
             </div>
-            <p id="installHelpNote" class="install-help-note" role="status">Installation availability depends on your
-                browser and how the site is hosted.</p>
-            <button type="button" id="installHelpTryBtn" class="primary-btn install-help-try hidden">Try Install
-                Again</button>
+            <p id="installHelpNote" class="install-help-note" role="status">Installation availability depends on your browser and how the site is hosted.</p>
+            <button type="button" id="installHelpTryBtn" class="primary-btn install-help-try hidden">Try Install Again</button>
         </div>
     </div>
 
     <!-- CONVERSATION PIN LOCK CARD -->
-    <div class="profile-modal pin-lock-modal" id="pinLockModal" role="dialog" aria-modal="true" aria-hidden="true"
-        aria-labelledby="pinLockTitle">
+    <div class="profile-modal pin-lock-modal" id="pinLockModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="pinLockTitle">
         <div class="profile-card modal-panel pin-lock-panel">
             <button class="modal-x" id="closePinLock" type="button" aria-label="Close PIN lock">×</button>
             <div class="pin-lock-emblem" id="pinLockEmblem">🔐</div>
             <span class="section-kicker" id="pinLockEyebrow">PRIVATE CONVERSATION</span>
             <h2 id="pinLockTitle">Lock conversation</h2>
-            <p class="pin-lock-description" id="pinLockDescription">Create a PIN to add a local privacy lock to this
-                conversation on this device.</p>
-            <div class="pin-lock-user-chip"><span>💬</span>
-                <div><small>CONVERSATION</small><strong id="pinLockChatName">Player</strong></div>
-            </div>
+            <p class="pin-lock-description" id="pinLockDescription">Create a PIN to add a local privacy lock to this conversation on this device.</p>
+            <div class="pin-lock-user-chip"><span>💬</span><div><small>CONVERSATION</small><strong id="pinLockChatName">Player</strong></div></div>
             <form id="pinLockForm" novalidate>
                 <label class="pin-field" for="pinPrimaryInput">
                     <span id="pinPrimaryLabel">Create a 4–8 digit PIN</span>
-                    <input id="pinPrimaryInput" name="pin" type="password" inputmode="numeric" pattern="[0-9]*"
-                        minlength="4" maxlength="8" autocomplete="new-password" placeholder="Enter 4–8 digits"
-                        aria-describedby="pinLockFeedback" required>
+                    <input id="pinPrimaryInput" name="pin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" autocomplete="new-password" placeholder="Enter 4–8 digits" aria-describedby="pinLockFeedback" required>
                 </label>
                 <label class="pin-field" id="pinConfirmField" for="pinConfirmInput">
                     <span>Confirm PIN</span>
-                    <input id="pinConfirmInput" name="confirmPin" type="password" inputmode="numeric" pattern="[0-9]*"
-                        minlength="4" maxlength="8" autocomplete="new-password" placeholder="Re-enter your PIN">
+                    <input id="pinConfirmInput" name="confirmPin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" autocomplete="new-password" placeholder="Re-enter your PIN">
                 </label>
                 <div id="pinLockFeedback" class="pin-lock-feedback" role="status" aria-live="polite"></div>
                 <div class="pin-lock-actions">
@@ -584,8 +448,7 @@
                     <button type="submit" id="submitPinLock" class="primary-btn">Lock conversation</button>
                 </div>
             </form>
-            <p class="pin-lock-footnote"><span>ⓘ</span> This PIN is stored locally on this browser/device. It is a
-                privacy lock, not end-to-end encryption, and it does not protect messages on other devices.</p>
+            <p class="pin-lock-footnote"><span>ⓘ</span> This PIN is stored locally on this browser/device. It is a privacy lock, not end-to-end encryption, and it does not protect messages on other devices.</p>
         </div>
     </div>
 
@@ -596,27 +459,19 @@
         <button type="button" data-conversation-action="pin" role="menuitem">📌 Pin conversation</button>
         <button type="button" data-conversation-action="unread" role="menuitem">✉ Mark as unread</button>
         <button type="button" data-conversation-action="lock" role="menuitem">🔒 Lock conversation</button>
-        <button type="button" data-conversation-action="delete" class="conversation-delete" role="menuitem">🗑 Delete
-            conversation</button>
+        <button type="button" data-conversation-action="delete" class="conversation-delete" role="menuitem">🗑 Delete conversation</button>
     </div>
 
-    <div class="profile-modal weapon-picker-modal" id="weaponPickerModal" role="dialog" aria-modal="true"
-        aria-hidden="true">
+    <div class="profile-modal weapon-picker-modal" id="weaponPickerModal" role="dialog" aria-modal="true" aria-hidden="true">
         <div class="profile-card weapon-picker-panel">
             <button class="modal-x" id="closeWeaponPicker" aria-label="Close weapon picker">×</button>
             <span class="section-kicker">MOBILE CONTROLS</span>
             <h2>Choose your weapon</h2>
             <p>Pick your move without leaving the battle screen.</p>
             <div class="mobile-choices">
-                <button class="choice mobile-choice" data-choice="rock">
-                    <div class="emoji">✊</div><strong>Rock</strong><small>Crushes scissors</small>
-                </button>
-                <button class="choice mobile-choice" data-choice="paper">
-                    <div class="emoji">✋</div><strong>Paper</strong><small>Covers rock</small>
-                </button>
-                <button class="choice mobile-choice" data-choice="scissors">
-                    <div class="emoji">✌️</div><strong>Scissors</strong><small>Cuts paper</small>
-                </button>
+                <button class="choice mobile-choice" data-choice="rock"><div class="emoji">✊</div><strong>Rock</strong><small>Crushes scissors</small></button>
+                <button class="choice mobile-choice" data-choice="paper"><div class="emoji">✋</div><strong>Paper</strong><small>Covers rock</small></button>
+                <button class="choice mobile-choice" data-choice="scissors"><div class="emoji">✌️</div><strong>Scissors</strong><small>Cuts paper</small></button>
             </div>
         </div>
     </div>
@@ -633,9 +488,7 @@
                 </div>
                 <button class="small-action" id="markNotifReadBtn">Mark all read</button>
             </div>
-            <div id="notifList" class="notification-list">
-                <div class="empty-state">No requests yet.</div>
-            </div>
+            <div id="notifList" class="notification-list"><div class="empty-state">No requests yet.</div></div>
         </div>
     </div>
 
@@ -652,6 +505,7 @@
                 <button class="settings-tab" data-tab="notifications"><span></span> Notifications</button>
                 <button class="settings-tab" data-tab="security"><span></span> Security</button>
                 <button class="settings-tab" data-tab="privacy"><span></span> Privacy</button>
+                <button class="settings-tab" data-tab="device"><span>🌐</span> Device & Weather</button>
                 <button class="settings-tab settings-danger-tab" data-tab="danger"><span></span> Danger Zone</button>
             </aside>
 
@@ -666,23 +520,15 @@
                     </div>
                     <div class="settings-card account-card">
                         <div class="account-row">
-                            <img id="settingsProfileImage" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                                alt="">
-                            <div><strong id="settingsDisplayName">Player</strong><span id="settingsEmail">Email:
-                                    —</span><span id="settingsUID">User ID: —</span></div>
+                            <img id="settingsProfileImage" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+                            <div><strong id="settingsDisplayName">Player</strong><span id="settingsEmail">Email: —</span><span id="settingsUID">User ID: —</span></div>
                             <button id="copyUidBtn" class="small-action">Copy ID</button>
                         </div>
-                        <label>Username<input type="text" id="newUsername" placeholder="New username"
-                                maxlength="24"></label>
+                        <label>Username<input type="text" id="newUsername" placeholder="New username" maxlength="24"></label>
                         <button id="changeUsernameBtn" class="primary-btn">Save username</button>
                     </div>
                     <div class="settings-card">
-                        <div class="card-title-row">
-                            <div>
-                                <h3>Profile export</h3>
-                                <p>Save your public profile and stats as a JSON backup.</p>
-                            </div><button id="exportProfileBtn" class="secondary-btn">Export profile</button>
-                        </div>
+                        <div class="card-title-row"><div><h3>Profile export</h3><p>Save your public profile and stats as a JSON backup.</p></div><button id="exportProfileBtn" class="secondary-btn">Export profile</button></div>
                         <button id="resetSettingsBtn" class="text-btn">Reset app preferences</button>
                     </div>
                 </div>
@@ -701,18 +547,8 @@
                         </div>
                     </div>
                     <div class="settings-card">
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Reduce motion</h3>
-                                <p>Use softer transitions and fewer effects.</p>
-                            </div><label class="switch"><input type="checkbox" id="reducedMotion"><span></span></label>
-                        </div>
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Compact game cards</h3>
-                                <p>Reduce spacing for smaller screens and laptops.</p>
-                            </div><label class="switch"><input type="checkbox" id="compactMode"><span></span></label>
-                        </div>
+                        <div class="toggle-row"><div><h3>Reduce motion</h3><p>Use softer transitions and fewer effects.</p></div><label class="switch"><input type="checkbox" id="reducedMotion"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Compact game cards</h3><p>Reduce spacing for smaller screens and laptops.</p></div><label class="switch"><input type="checkbox" id="compactMode"><span></span></label></div>
                     </div>
                 </div>
 
@@ -723,32 +559,10 @@
                         <p>Choose how WHITE_RPS keeps you informed.</p>
                     </div>
                     <div class="settings-card">
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Sound effects</h3>
-                                <p>Buttons, alerts, and battle sounds.</p>
-                            </div><label class="switch"><input type="checkbox" id="soundEnabled"><span></span></label>
-                        </div>
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Challenge notifications</h3>
-                                <p>Allow challenge sounds and badges.</p>
-                            </div><label class="switch"><input type="checkbox"
-                                    id="challengeNotifications"><span></span></label>
-                        </div>
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Desktop notifications</h3>
-                                <p>Show browser alerts when a challenge arrives.</p>
-                            </div><label class="switch"><input type="checkbox"
-                                    id="desktopNotifications"><span></span></label>
-                        </div>
-                        <div class="range-row">
-                            <div>
-                                <h3>Notification volume</h3>
-                                <p>Adjust alert volume.</p>
-                            </div><input type="range" id="notificationVolume" min="0" max="1" step="0.05">
-                        </div>
+                        <div class="toggle-row"><div><h3>Sound effects</h3><p>Buttons, alerts, and battle sounds.</p></div><label class="switch"><input type="checkbox" id="soundEnabled"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Challenge notifications</h3><p>Allow challenge sounds and badges.</p></div><label class="switch"><input type="checkbox" id="challengeNotifications"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Desktop notifications</h3><p>Show browser alerts when a challenge arrives.</p></div><label class="switch"><input type="checkbox" id="desktopNotifications"><span></span></label></div>
+                        <div class="range-row"><div><h3>Notification volume</h3><p>Adjust alert volume.</p></div><input type="range" id="notificationVolume" min="0" max="1" step="0.05"></div>
                     </div>
                 </div>
 
@@ -759,12 +573,9 @@
                         <p>Keep your account credentials under control.</p>
                     </div>
                     <div class="settings-card">
-                        <label>Current password<input type="password" id="currentPassword"
-                                autocomplete="current-password" placeholder="Enter current password"></label>
-                        <label>New password<input type="password" id="newPassword" autocomplete="new-password"
-                                placeholder="At least 6 characters"></label>
-                        <label>Confirm password<input type="password" id="confirmPassword" autocomplete="new-password"
-                                placeholder="Repeat new password"></label>
+                        <label>Current password<input type="password" id="currentPassword" autocomplete="current-password" placeholder="Enter current password"></label>
+                        <label>New password<input type="password" id="newPassword" autocomplete="new-password" placeholder="At least 6 characters"></label>
+                        <label>Confirm password<input type="password" id="confirmPassword" autocomplete="new-password" placeholder="Repeat new password"></label>
                         <button id="changePasswordBtn" class="primary-btn">Update Password</button>
                     </div>
                 </div>
@@ -776,25 +587,52 @@
                         <p>Control what other players can see and do.</p>
                     </div>
                     <div class="settings-card">
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Show online status</h3>
-                                <p>Let other players see when you are active.</p>
-                            </div><label class="switch"><input type="checkbox" id="onlineStatus"><span></span></label>
-                        </div>
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Allow game requests</h3>
-                                <p>Let players challenge you to a match.</p>
-                            </div><label class="switch"><input type="checkbox" id="gameRequest"><span></span></label>
-                        </div>
-                        <div class="toggle-row">
-                            <div>
-                                <h3>Enter sends chat</h3>
-                                <p>Press Enter to send; Shift + Enter adds a new line.</p>
-                            </div><label class="switch"><input type="checkbox" id="enterToSend"><span></span></label>
-                        </div>
+                        <div class="toggle-row"><div><h3>Show online status</h3><p>Let other players see when you are active.</p></div><label class="switch"><input type="checkbox" id="onlineStatus"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Allow game requests</h3><p>Let players challenge you to a match.</p></div><label class="switch"><input type="checkbox" id="gameRequest"><span></span></label></div>
+                        <div class="toggle-row"><div><h3>Enter sends chat</h3><p>Press Enter to send; Shift + Enter adds a new line.</p></div><label class="switch"><input type="checkbox" id="enterToSend"><span></span></label></div>
                         <button id="savePrivacyBtn" class="primary-btn">Save privacy settings</button>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="device">
+                    <div class="modal-heading">
+                        <span class="section-kicker">DEVICE & LOCATION</span>
+                        <h2>Device & Local Weather</h2>
+                        <p>View your public network address, approximate area, local timezone, and current weather.</p>
+                    </div>
+
+                    <div class="settings-card device-weather-card">
+                        <div class="device-weather-heading">
+                            <div class="device-weather-icon" id="deviceWeatherIcon" aria-hidden="true">🌤️</div>
+                            <div class="device-weather-main">
+                                <span class="device-card-kicker">CURRENT CONDITIONS</span>
+                                <strong id="deviceWeatherTemp">—°C</strong>
+                                <p id="deviceWeatherDescription">Open Device & Weather to load current conditions.</p>
+                            </div>
+                            <div class="weather-live-pill"><span></span> LIVE DATA</div>
+                        </div>
+                        <div class="weather-details" id="deviceWeatherDetails">
+                            <span>Feels like —</span><span>Humidity —</span><span>Wind —</span>
+                        </div>
+                        <div class="weather-footnote"><span id="deviceWeatherUpdated">Weather has not been loaded yet.</span><a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Weather data by Open-Meteo</a></div>
+                    </div>
+
+                    <div class="settings-card device-info-card">
+                        <div class="device-info-header">
+                            <div><h3>Network & location details</h3><p id="deviceInfoStatus" role="status" aria-live="polite">Your information will load when this section opens.</p></div>
+                            <button id="refreshDeviceInfoBtn" class="secondary-btn" type="button">↻ Refresh</button>
+                        </div>
+                        <div class="device-detail-grid">
+                            <div class="device-detail-item"><span>Public IP address</span><strong id="deviceIp">Not loaded</strong><small>Visible to websites you visit.</small></div>
+                            <div class="device-detail-item"><span>IP-based location</span><strong id="deviceLocation">Not loaded</strong><small id="deviceLocationDetail">Approximate area; not exact GPS.</small></div>
+                            <div class="device-detail-item"><span>Browser timezone</span><strong id="deviceTimezone">Detecting…</strong><small>Based on your device settings.</small></div>
+                            <div class="device-detail-item"><span>Coordinates used for weather</span><strong id="deviceCoordinates">Not loaded</strong><small>Approximate by default; precise location is optional.</small></div>
+                        </div>
+                        <div class="device-location-actions">
+                            <button id="usePreciseLocationBtn" class="primary-btn" type="button">Use precise location</button>
+                            <button id="useIpLocationBtn" class="secondary-btn" type="button">Use IP-based location</button>
+                        </div>
+                        <p class="device-privacy-note">Privacy: IP-based area is estimated by a third-party lookup service. Precise location is requested only when you press the button above. This feature does not save your IP address or coordinates to your WHITE_RPS profile/database. Location and weather require an internet connection.</p>
                     </div>
                 </div>
 
@@ -806,8 +644,7 @@
                     </div>
                     <div class="settings-card danger-card">
                         <h3>Permanently delete account</h3>
-                        <p>This action cannot be undone. Your authentication account and public profile will be removed.
-                        </p>
+                        <p>This action cannot be undone. Your authentication account and public profile will be removed.</p>
                         <button id="deleteAccountBtn" class="danger-btn">Delete Account</button>
                     </div>
                 </div>
@@ -833,72 +670,11 @@
             </div>
             <div id="leaderboardPodium" class="leaderboard-podium"></div>
             <div class="leaderboard-me" id="leaderboardMe"></div>
-            <div id="leaderboardList" class="leaderboard-list">
-                <div class="empty-state">Loading…</div>
-            </div>
+            <div id="leaderboardList" class="leaderboard-list"><div class="empty-state">Loading…</div></div>
         </div>
     </div>
 
     <script type="module" src="pwa.js"></script>
     <script type="module" src="main.js"></script>
-
-    <script>
-        let is24Hour = false;
-        let showSeconds = true;
-
-        function updateClock() {
-            const now = new Date();
-
-            const timeOptions = {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: !is24Hour
-            };
-
-            if (showSeconds) {
-                timeOptions.second = "2-digit";
-            }
-
-            document.getElementById("time").textContent =
-                new Intl.DateTimeFormat("en-US", timeOptions)
-                    .format(now);
-
-            document.getElementById("date").textContent =
-                new Intl.DateTimeFormat("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric"
-                }).format(now);
-
-            const zone = Intl.DateTimeFormat()
-                .resolvedOptions().timeZone;
-
-            document.getElementById("timezone").textContent =
-                zone.replaceAll("_", " ").toUpperCase();
-        }
-
-        function toggleFormat() {
-            is24Hour = !is24Hour;
-
-            document.getElementById("formatBtn").textContent =
-                is24Hour ? "Switch to 12H" : "Switch to 24H";
-
-            updateClock();
-        }
-
-        function toggleSeconds() {
-            showSeconds = !showSeconds;
-
-            document.getElementById("secondsBtn").textContent =
-                showSeconds ? "Hide Seconds" : "Show Seconds";
-
-            updateClock();
-        }
-
-        updateClock();
-        setInterval(updateClock, 1000);
-    </script>
 </body>
-
 </html>

@@ -24,7 +24,7 @@ body::after{width:280px;height:280px;left:-130px;top:-110px;background:rgba(89,2
 }
 .login-container::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(119,242,168,.05),transparent 36%,rgba(89,217,246,.04))}
 .brand-panel{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:48px;background:linear-gradient(145deg,rgba(119,242,168,.10),rgba(89,217,246,.03) 42%,transparent)}
-.brand-kicker{color:#93a1ae;font-size:10px;font-weight:800;letter-spacing:.17em; margin-top: 10px;}
+.brand-kicker{color:#93a1ae;font-size:10px;font-weight:800;letter-spacing:.17em}
 .brand-panel h1{margin-top:12px;font-size:clamp(44px,7vw,74px);line-height:.9;letter-spacing:-.07em}
 .brand-panel h1 span{color:var(--accent)}
 .brand-panel p{max-width:430px;margin-top:18px;color:var(--muted);font-size:14px;line-height:1.7}

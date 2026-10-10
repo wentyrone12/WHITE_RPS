@@ -66,3 +66,11 @@ This allows signed-in users to read public posts and only create/update/delete p
 - Added an **Install App** entry in the dashboard sidebar, a web app manifest, branded 192/512 app icons, and a separate early-loading `pwa.js` install module plus service worker that caches the app shell for faster startup and offline page-shell access. Firebase authentication, public chat, and realtime messaging still require an internet connection.
 - For installation, deploy the folder to an HTTPS website (or run it from `localhost` for development). Opening `index.html` directly using `file://` does not support PWA installation/service workers. On iPhone/iPad, use Safari's Share menu → Add to Home Screen.
 - The conversation lock now uses a dedicated in-app PIN card for creating, confirming, entering, or removing a PIN. Incorrect PIN feedback is shown in the card; this PIN workflow does not use native JavaScript `prompt()` or `alert()` dialogs. New PIN hashes use salted PBKDF2-SHA-256 (120,000 iterations) and are stored in browser-local storage per signed-in user/device, so this is a local privacy lock rather than server-enforced encryption. Clearing browser storage or switching browsers/devices does not transfer the lock settings.
+
+## Real-time clock, IP location, and weather (added)
+- The dashboard top bar displays the current browser/device local time, date, and timezone.
+- Settings → Device & Weather shows the public IP and an approximate IP-based city/region/country. It fetches IP metadata from ipapi.co, with ipwho.is as a fallback.
+- Current weather is fetched from Open-Meteo using the approximate IP coordinates. Select **Use precise location** to request the browser's location permission and use its coordinates for weather; this is optional. **Use IP-based location** returns to the approximate estimate.
+- These values are displayed in the browser only and are not written to Firebase or the account profile. The external IP lookup service receives the visitor's request/public IP when this panel loads.
+- Location/weather lookup requires an internet connection and a browser that allows cross-origin requests. If a service is unavailable or rate-limited, use **Refresh** and try again later. Precise browser geolocation normally requires HTTPS or localhost.
+- Weather data is provided by [Open-Meteo](https://open-meteo.com/).

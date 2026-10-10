@@ -121,8 +121,8 @@ html[data-theme="light"] .sidebar {
 .nav-btn {
     width: 100%; border: 1px solid transparent; background: transparent;
     min-height: 48px; padding: 0 13px; border-radius: 15px;
-    display: block; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px;
-    text-align: start; cursor: pointer; color: var(--muted);
+    display: block; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px;text-align: start;
+    text-align: left; cursor: pointer; color: var(--muted);
     transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
 }
 .nav-btn:hover { transform: translateX(3px); color: var(--text); background: var(--surface-3); border-color: var(--line); }
@@ -169,6 +169,17 @@ html[data-theme="light"] .sidebar {
     color: var(--muted); letter-spacing: .16em; font-size: 10px; font-weight: 800;
 }
 .topbar h1 { margin-top: 5px; font-size: clamp(22px, 3vw, 30px); letter-spacing: -.035em; }
+.topbar-heading { min-width:0; }
+.world-clock {
+    flex:none; display:flex; align-items:center; gap:11px; min-width:250px; padding:10px 13px;
+    border:1px solid var(--line); border-radius:16px; background:linear-gradient(135deg,var(--surface),var(--surface-3));
+    box-shadow:var(--shadow-soft); font-variant-numeric:tabular-nums;
+}
+.world-clock-icon { width:35px; height:35px; display:grid; place-items:center; flex:none; border-radius:12px; background:var(--accent-soft); color:var(--accent); font-size:25px; line-height:1; }
+.world-clock-copy { display:grid; gap:3px; min-width:0; }
+.world-clock-time { display:block; color:var(--text); font-size:16px; font-weight:950; line-height:1.1; letter-spacing:-.025em; white-space:nowrap; }
+.world-clock-date { color:var(--muted); font-size:10px; white-space:nowrap; }
+.world-clock-zone { margin-left:auto; padding-left:9px; border-left:1px solid var(--line); color:var(--muted); font-size:9px; font-weight:800; max-width:108px; overflow-wrap:anywhere; }
 .topbar-actions { display:flex; align-items:center; gap: 8px; }
 .icon-btn, .user-chip, .ghost-icon, .small-action, .back-chat {
     border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-soft); cursor:pointer;
@@ -477,6 +488,32 @@ html[data-theme="light"] .choice { background:#fff; }
 }
 .settings-card h3 { font-size:13px; }
 .settings-card p { color:var(--muted); font-size:11px; margin-top:4px; line-height:1.5; }
+.device-weather-card { overflow:hidden; background:radial-gradient(circle at 95% 0%,rgba(89,217,246,.10),transparent 42%),var(--surface-3); }
+.device-weather-heading { display:flex; align-items:center; gap:14px; min-width:0; }
+.device-weather-icon { display:grid; place-items:center; width:66px; height:66px; flex:none; border-radius:20px; background:rgba(89,217,246,.09); border:1px solid rgba(89,217,246,.13); font-size:34px; }
+.device-weather-main { flex:1; min-width:0; }
+.device-card-kicker { display:block; color:var(--muted); font-size:9px; font-weight:900; letter-spacing:.14em; }
+.device-weather-main strong { display:block; margin-top:2px; font-size:31px; line-height:1.1; letter-spacing:-.05em; }
+.device-weather-main p { margin-top:5px; }
+.weather-live-pill { display:flex; align-items:center; gap:6px; align-self:flex-start; padding:6px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:8px; font-weight:900; letter-spacing:.08em; white-space:nowrap; }
+.weather-live-pill span { width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+.weather-details { display:flex; flex-wrap:wrap; gap:7px; margin-top:15px; }
+.weather-details span { padding:7px 9px; border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,.08); color:var(--muted); font-size:10px; }
+.weather-footnote { display:flex; flex-wrap:wrap; justify-content:space-between; gap:7px 14px; margin-top:13px; padding-top:11px; border-top:1px solid var(--line); color:var(--muted-2); font-size:9px; }
+.weather-footnote a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+.device-info-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.device-info-header > div { min-width:0; }
+.device-info-header .secondary-btn { flex:none; min-height:36px; padding:0 11px; }
+#deviceInfoStatus[data-state="error"] { color:#ff9aa4; }
+#deviceInfoStatus[data-state="success"] { color:var(--accent); }
+.device-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:15px; }
+.device-detail-item { min-width:0; padding:13px; border:1px solid var(--line); background:var(--surface); border-radius:13px; }
+.device-detail-item > span { display:block; color:var(--muted); font-size:10px; font-weight:800; }
+.device-detail-item strong { display:block; margin-top:7px; color:var(--text); font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
+.device-detail-item small { display:block; margin-top:5px; color:var(--muted-2); font-size:9px; line-height:1.4; }
+.device-location-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.device-location-actions button { min-height:39px; }
+.device-privacy-note { margin-top:13px !important; padding-top:12px; border-top:1px solid var(--line); font-size:10px !important; }
 .account-row { display:flex; align-items:center; gap:10px; margin-bottom:15px; }
 .account-row img { width:52px; height:52px; border-radius:15px; object-fit:cover; }
 .account-row > div { flex:1; min-width:0; }
@@ -578,6 +615,10 @@ body.compact-mode .choice { min-height:120px; }
     .quick-grid { grid-template-columns:repeat(2,1fr); }
 }
 @media (max-width: 820px) {
+    .topbar { flex-wrap:wrap; }
+    .topbar-heading { order:1; }
+    .topbar-actions { order:2; margin-left:auto; }
+    .world-clock { order:3; flex:1 0 100%; min-width:0; }
     .menu-btn { display:grid; place-items:center; }
     .sidebar { left:14px; top:14px; bottom:14px; transform:translateX(calc(-100% - 25px)); width:min(290px, calc(100vw - 28px)); }
     .sidebar.active { transform:translateX(0); }
@@ -597,6 +638,10 @@ body.compact-mode .choice { min-height:120px; }
     .profile-modal, .game-popup { padding:10px; align-items:flex-end; }
     .modal-panel, .leaderboard-panel, .profile-card-compact, .popup-card { border-radius:22px; }
     .topbar { margin-bottom:11px; align-items:flex-end; }
+    .world-clock { gap:9px; padding:9px 10px; border-radius:14px; }
+    .world-clock-icon { width:31px; height:31px; font-size:22px; }
+    .world-clock-time { font-size:15px; }
+    .world-clock-zone { max-width:90px; font-size:8px; }
     .topbar-actions .user-chip span { display:none; }
     .topbar h1 { font-size:20px; }
     .hero-strip { align-items:flex-start; flex-direction:column; }
@@ -650,7 +695,16 @@ body.compact-mode .choice { min-height:120px; }
     .main-shell { padding-inline:10px; }
     .quick-grid { gap:7px; }
     .info-card strong { font-size:11px; }
-    .topbar h1 { max-width:220px; }
+    .topbar h1 { max-width:500px; display: flex; }
+    .world-clock-date { white-space:normal; }
+    .device-weather-heading { gap:10px; align-items:flex-start; }
+    .device-weather-icon { width:54px; height:54px; border-radius:16px; font-size:28px; }
+    .device-weather-main strong { font-size:27px; }
+    .weather-live-pill { font-size:7px; padding:5px 6px; }
+    .device-detail-grid { grid-template-columns:1fr; }
+    .device-info-header { align-items:flex-start; }
+    .device-location-actions { flex-direction:column; }
+    .device-location-actions button { width:100%; }
     .profile-action-buttons { grid-template-columns:1fr; }
 }
 
